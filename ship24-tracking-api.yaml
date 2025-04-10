@@ -1,0 +1,2422 @@
+openapi: 3.1.0
+info:
+  title: Ship24 Tracking API
+  description: |-
+    ## Getting started
+
+    Make sure to read the [Getting started](https://docs.ship24.com/getting-started) section of our [API Documentation](https://docs.ship24.com/) before using the endpoints presented below.
+    ## Documentation structure
+
+    Use the top navigation bar to switch from:
+
+    - Our [API Documentation](https://docs.ship24.com/), which contains a comprehensive explanation of how our API works.
+    - Our [API Reference](https://docs.ship24.com/tracking-api-reference/), which contains the specification of each of our endpoints.
+    - Our [Support](https://docs.ship24.com/support/introduction) section, which contains help articles for most of the common questions and issues you may encounter.
+
+    ## Import our documentation into your HTTP client
+
+    Our API Reference is available as an Open API 3.1 format file, which is supported by most HTTP clients.
+
+    - Latest version: https://docs.ship24.com/assets/openapi/ship24-tracking-api.yaml
+
+    | <!-- -->                                                     | <!-- -->                                                                                                                                                     |
+    | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | ![Postman](/img/postman-logo.svg) Postman                    | In Postman, click on "Import", go on the "Link" tab, and paste this URL `https://docs.ship24.com/assets/openapi/ship24-tracking-api.yaml`                           |
+    | <img src="/img/insomnia-logo.png" width="32"></img> Insomnia | From Insomnia preferences, locate the "Import data" option, choose "From URL", and paste this URL `https://docs.ship24.com/assets/openapi/ship24-tracking-api.yaml` |
+  version: 1.0.0
+  contact:
+    name: Ship24
+    url: "https://www.ship24.com/contact-us"
+servers:
+  - url: "https://api.ship24.com"
+components:
+  securitySchemes:
+    Authorization:
+      name: Bearer your_api_key
+      type: apiKey
+      in: header
+      description: |-
+        The Ship24 API uses API keys to authenticate requests. You can [view and manage them in your Dashboard](https://dashboard.ship24.com/integrations/api-keys). A `Default` API key is created after you subscribe to a plan.
+
+        To authenticate your requests, include an `Authorization` HTTP header to all your requests with the following value: `Bearer your_api_key`. (Replace `your_api_key` by the one from your dashboard and don't forget the `Bearer` prefix.)
+  schemas:
+    tracker:
+      type: object
+      x-internal: true
+      title: Tracker
+      properties:
+        trackerId:
+          type: string
+          description: The id of the tracker that is providing this tracking.
+          example: 26148317-7502-d3ac-44a9-546d240ac0dd
+        trackingNumber:
+          type: string
+          description: The tracking number which the tracker is following.
+          example: S24DEMO456393
+        shipmentReference:
+          type:
+            - string
+            - "null"
+          description: The `shipmentReference` you provided at the tracker's creation.
+          example: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+        courierCode:
+          type:
+            - array
+            - string
+          description: "Code of the courier(s) handling the shipment."
+          example:
+            - us-post
+          minItems: 0
+          maxItems: 3
+          items:
+            type: string
+        clientTrackerId:
+          type:
+            - string
+            - "null"
+          description: The `clientTrackerId` you provided at the tracker's creation.
+          example: 3fa99515-3ca0-4901-85bb-056ee016799b
+        isSubscribed:
+          type: boolean
+          description: Indicates whether the tracker is active. A value of `false` means the tracker is archived and will not be used for tracking.
+          example: true
+        isTracked:
+          type: boolean
+          description: Indicates whether we are actively tracking the parcel. A value of `true` means new data is being searched for, while `false` indicates tracking has stopped due to delivery, inactivity, or unsubscription. Existing tracking results will remain accessible; however, new data will not be fetched, and notifications will no longer be sent.
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: "The date and time at which the tracker was created."
+          example: "2021-03-10T05:13:00.000Z"
+      required:
+        - trackerId
+        - trackingNumber
+        - shipmentReference
+        - clientTrackerId
+        - isSubscribed
+        - isTracked
+        - createdAt
+    tracking:
+      type: object
+      title: Tracking
+      description: |-
+        A `Tracking` object is used in our API to provide tracking results on your `Trackers` . tracking results are basically updated information about a shipments, including shipment-level information, events and statistics. The `Tracking` object is used both in the response body of our endpoints, as well as in the request body of your webhooks.
+
+        A `tracking` object can be composed of the following parts:
+        | Field | Description |
+        | -- |   -- |
+          `tracker` |  In case the `tracking` is pushed by webhook and fetched from a _tracker_, the object `tracker` will be present and will refer to which _tracker_ this `tracking` results comes from. |
+        |  `shipment` |  The object `shipment` contains the general shipment information. |
+        |  `events`  |  The object `events` contains the tracking event(s), order by date descending (the most recent one is the first one of the array). When getting `tracking` by fetching results from our API, `events` will contains all events of the shipments. When getting `tracking` by webhooks, `events` will contains only the events discovered since the last push. |
+        | `statistics`  |  The object `statistics` contains statistics about the shipment lifecycle, such as timestamps of the key milestones of the shipment. |
+        | `metadata` *(in webhooks only)* | The object `metadata` contains webhooks related metadata, such as the `generatedAt` date, allowing you to know when the data contained in the webhook has been generated. |
+
+        ### `tracking` object in webhooks
+        In the webhooks, `tracking` objects are used in a `trackings` array, directly at the root of the JSON document:
+        ```json
+        {
+          "trackings": [
+            {
+              "metadata": {
+                "generatedAt": "2023-01-19T09:12:39.052Z"
+                "messageId": "356a7f93-3ce5-4b49-b560-156537283df9"
+              },
+              "tracker": {
+                "trackerId": "26148317-7502-d3ac-44a9-546d240ac0dd",
+                "trackingNumber": "S24DEMO456393",
+                "shipmentReference": "c6e4fef4-a816-b68f-4024-3b7e4c5a9f81",
+                "clientTrackerId": "3fa99515-3ca0-4901-85bb-056ee016799b",
+                "isSubscribed": true,
+                "isTracked": true,
+                "createdAt": "2021-03-10T05:13:00.000Z"
+              },
+              "shipment": {
+              ...
+        ```
+
+        ### `tracking` object in API response
+        In the API response,  `tracking` objects are used in a `trackings` array inside the `data` object in the JSON document:
+        ```json
+        {
+          "data": {
+            "trackings": [
+              {
+                "tracker": {
+                  "trackerId": "26148317-7502-d3ac-44a9-546d240ac0dd",
+                  "trackingNumber": "S24DEMO456393",
+                  "shipmentReference": "c6e4fef4-a816-b68f-4024-3b7e4c5a9f81",
+                  "clientTrackerId": "3fa99515-3ca0-4901-85bb-056ee016799b",
+                  "isSubscribed": true,
+                  "isTracked": true,
+                  "createdAt": "2021-03-10T05:13:00.000Z"
+              },
+              "shipment": {
+              ...
+        ```
+      examples:
+        - tracker:
+            trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+            trackingNumber: S24DEMO456393
+            shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+            clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+            isSubscribed: true
+            isTracked: true
+            createdAt: "2021-03-10T05:13:00.000Z"
+          shipment:
+            shipmentId: f4f888d7-d140-423f-9a48-e0689d27e098
+            statusCode: delivery_delivered
+            statusCategory: delivery
+            statusMilestone: delivered
+            originCountryCode: CN
+            destinationCountryCode: US
+            trackingNumbers:
+              - tn: S24DEMO169411
+              - tn: S24DEMO456393
+            delivery:
+              estimatedDeliveryDate: "2021-03-04T17:00:00.000Z"
+              service: Parcel Post
+              signedBy: John Doe
+            recipient:
+              name: John Doe
+              address: 12515 Research Blvd
+              postCode: "78738"
+              city: Austin
+              subdivision: TX
+          events:
+            - eventId: c6fbe883-49dc-7cba-48c4-46c6efd29db6
+              trackingNumber: S24DEMO169411
+              eventTrackingNumber: S24DEMO169411
+              status: Delivered to the addressee
+              occurrenceDatetime: "2021-03-04T17:12:57"
+              order: null
+              location: "SAN RAFAEL, CA 94901"
+              sourceCode: usps-tracking
+              courierCode: us-post
+              statusCategory: delivery
+              statusCode: delivery_delivered
+              statusMilestone: delivered
+            - eventId: ecb7f9fe-eb7e-e9bf-406a-a9eb5d3b0853
+              trackingNumber: S24DEMO169411
+              eventTrackingNumber: S24DEMO169411
+              status: Out for Delivery
+              occurrenceDatetime: "2021-03-04T10:12:57"
+              order: null
+              location: "SAN RAFAEL, CA 94901"
+              sourceCode: usps-tracking
+              courierCode: us-post
+              statusCategory: delivery
+              statusCode: delivery_out_for_delivery
+              statusMilestone: out_for_delivery
+            - eventId: d7d16234-280b-128f-4395-1abf79816837
+              trackingNumber: S24DEMO169411
+              eventTrackingNumber: S24DEMO169411
+              status: "Arrived at Hub, Your item arrived at the hub."
+              occurrenceDatetime: "2021-03-04T06:12:57"
+              order: null
+              location: "SAN RAFAEL, CA 94901"
+              sourceCode: usps-tracking
+              courierCode: us-post
+              statusCode: null
+              statusCategory: null
+              statusMilestone: in_transit
+            - eventId: df49f2c4-ee9e-80a0-4040-752e78c66068
+              trackingNumber: S24DEMO169411
+              eventTrackingNumber: S24DEMO169411
+              status: Processed Through Regional Facility
+              occurrenceDatetime: "2021-03-03T17:12:57"
+              order: null
+              location: LOS ANGELES CA INTERNATIONAL DISTRIBUTION CENTER
+              sourceCode: usps-tracking
+              courierCode: us-post
+              statusCode: null
+              statusCategory: null
+              statusMilestone: in_transit
+            - eventId: 77684052-5c58-37b1-4811-fc136a6685e3
+              trackingNumber: S24DEMO169411
+              eventTrackingNumber: S24DEMO169411
+              status: Arrived at Regional Facility
+              occurrenceDatetime: "2021-03-03T15:38:57"
+              order: null
+              location: LOS ANGELES CA INTERNATIONAL DISTRIBUTION CENTER
+              sourceCode: usps-tracking
+              courierCode: us-post
+              statusCode: null
+              statusCategory: null
+              statusMilestone: in_transit
+            - eventId: 398abf55-030e-3192-413a-3b6798706ed2
+              trackingNumber: S24DEMO169411
+              eventTrackingNumber: S24DEMO456393
+              status: Flight Departure
+              occurrenceDatetime: "2021-03-02T23:24:50"
+              order: null
+              location: Beijing airport
+              sourceCode: usps-tracking
+              courierCode: us-post
+              statusCode: null
+              statusCategory: null
+              statusMilestone: in_transit
+            - eventId: 9e12f95c-48bb-f1b9-4364-3a40e667d5a1
+              trackingNumber: S24DEMO169411
+              eventTrackingNumber: S24DEMO456393
+              status: Dispatched from Office of Exchange
+              occurrenceDatetime: "2021-03-02T22:23:41"
+              order: null
+              location: Beijing
+              sourceCode: usps-tracking
+              courierCode: us-post
+              statusCode: null
+              statusCategory: null
+              statusMilestone: in_transit
+            - eventId: 35b79d77-4d48-aa94-457d-1423658a9ffe
+              trackingNumber: S24DEMO169411
+              eventTrackingNumber: S24DEMO456393
+              status: Departure from Local Sorting Center
+              occurrenceDatetime: "2021-03-02T19:24:57"
+              order: null
+              location: Beijing
+              sourceCode: usps-tracking
+              courierCode: us-post
+              statusCode: null
+              statusCategory: null
+              statusMilestone: in_transit
+            - eventId: 52d54618-d602-eb91-496f-829302728146
+              trackingNumber: S24DEMO169411
+              eventTrackingNumber: S24DEMO456393
+              status: Package Received
+              occurrenceDatetime: "2021-03-02T15:38:57"
+              order: null
+              location: Beijing
+              sourceCode: usps-tracking
+              courierCode: us-post
+              statusCode: data_order_created
+              statusCategory: data
+              statusMilestone: info_received
+          metadata:
+            generatedAt: "2023-01-19T05:45:17.635Z"
+            messageId: "356a7f93-3ce5-4b49-b560-156537283df9"
+          statistics:
+            timestamps:
+              infoReceivedDatetime: "2021-03-02T15:38:57"
+              inTransitDatetime: "2021-03-02T19:24:57"
+              outForDeliveryDatetime: "2021-03-04T10:12:57"
+              failedAttemptDatetime: null
+              availableForPickupDatetime: null
+              exceptionDatetime: null
+              deliveredDatetime: "2021-03-04T17:12:57"
+      properties:
+        tracker:
+          $ref: "#/components/schemas/tracker"
+        shipment:
+          $ref: "#/components/schemas/shipment"
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/event"
+        statistics:
+          $ref: "#/components/schemas/statistics"
+        metadata:
+          $ref: "#/components/schemas/metadata"
+    statistics:
+      type: object
+      x-internal: true
+      properties:
+        timestamps:
+          type: object
+          description: "Date and time of the occurrence of each milestone of the shipment.\n\n[Date and time Format](https://docs.ship24.com/data-format#logistics-date-and-time)\n\n[List of Milestones](https://docs.ship24.com/status/#statusmilestone)"
+          properties:
+            infoReceivedDatetime:
+              type:
+                - string
+                - "null"
+              format: logistic-date-time
+              description: "Occurrence [date and time](https://docs.ship24.com/data-format#logistics-date-and-time) of the first `info_received` [milestone](https://docs.ship24.com/status/#statusmilestone)."
+              example: "2021-03-02T15:38:57"
+            inTransitDatetime:
+              type:
+                - string
+                - "null"
+              format: logistic-date-time
+              description: "Occurrence [date and time](https://docs.ship24.com/data-format#logistics-date-and-time) of the first `in_transit` [milestone](https://docs.ship24.com/status/#statusmilestone)."
+              example: "2021-03-02T19:24:57"
+            outForDeliveryDatetime:
+              type:
+                - string
+                - "null"
+              format: logistic-date-time
+              description: "Occurrence [date and time](https://docs.ship24.com/data-format#logistics-date-and-time) of the first `out_for_delivery` [milestone](https://docs.ship24.com/status/#statusmilestone)."
+              example: "2021-03-04T10:12:57"
+            failedAttemptDatetime:
+              type:
+                - string
+                - "null"
+              format: logistic-date-time
+              description: "Occurrence [date and time](https://docs.ship24.com/data-format#logistics-date-and-time) of the first `failed_attempt` [milestone](https://docs.ship24.com/status/#statusmilestone)."
+              example: "2021-03-04T11:33:00"
+            availableForPickupDatetime:
+              type:
+                - string
+                - "null"
+              format: logistic-date-time
+              description: "Occurrence [date and time](https://docs.ship24.com/data-format#logistics-date-and-time) of the first `available_for_pickup` [milestone](https://docs.ship24.com/status/#statusmilestone)."
+              example: "2021-03-04T15:26:00"
+            exceptionDatetime:
+              type:
+                - string
+                - "null"
+              format: logistic-date-time
+              description: "Occurrence [date and time](https://docs.ship24.com/data-format#logistics-date-and-time) of the first `exception` [milestone](https://docs.ship24.com/status/#statusmilestone)."
+              example: null
+            deliveredDatetime:
+              type:
+                - string
+                - "null"
+              format: logistic-date-time
+              description: "Occurrence [date and time](https://docs.ship24.com/data-format#logistics-date-and-time) of the first `delivered` [milestone](https://docs.ship24.com/status/#statusmilestone)."
+              example: "2021-03-05T17:12:57"
+    metadata:
+      type: object
+      x-internal: true
+      title: metadata
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+          example: "2022-12-15T15:42:00.000Z"
+          description: Date at which the webhook data was generated.
+        messageId:
+          type: string
+          example: "356a7f93-3ce5-4b49-b560-156537283df9"
+          description: Unique identifier of the tracking object across webhooks.
+    shipment:
+      type: object
+      x-internal: true
+      properties:
+        shipmentId:
+          type:
+            - string
+            - "null"
+          description: Unique identifier of the parcel in Ship24 system.
+          example: f4f888d7-d140-423f-9a48-e0689d27e098
+        statusCode:
+          type:
+            - string
+            - "null"
+          description: "[statusCode](https://docs.ship24.com/status/#statuscode-and-statuscategory) of the shipment."
+          example: delivery_delivered
+        statusCategory:
+          type:
+            - string
+            - "null"
+          description: "[statusCategory](https://docs.ship24.com/status/#statuscode-and-statuscategory) of the shipment."
+          example: delivery
+        statusMilestone:
+          type: string
+          description: "[statusMilestone](https:docs.ship24.com/status/#statusmilestone) of the shipment."
+          example: delivered
+        originCountryCode:
+          type:
+            - string
+            - "null"
+          description: Detected country code of origin.
+          example: CN
+        destinationCountryCode:
+          type:
+            - string
+            - "null"
+          description: Detected country code of destination.
+          example: US
+        delivery:
+          type: object
+          properties:
+            estimatedDeliveryDate:
+              type:
+                - string
+                - "null"
+              format: date-time
+              description: "Estimated delivery date of the shipment, if provided by the courier. Format: [Date and Time in UTC](http://docs.ship24.com/data-format#logistics-date-and-time)"
+              example: "2021-03-04T17:00:00.000Z"
+            service:
+              type:
+                - string
+                - "null"
+              description: Name of logistics service or product for the shipment.
+              example: Parcel Post
+            signedBy:
+              type:
+                - string
+                - "null"
+              description: Name of the person who signed for the shipment.
+              example: John Doe
+        trackingNumbers:
+          type:
+            - array
+          description: List of tracking numbers linked to the shipment.
+          example:
+            - tn: S24DEMO169411
+            - tn: S24DEMO456393
+          items:
+            type: object
+            properties:
+              tn:
+                type: string
+                description: Tracking number.
+        recipient:
+          type:
+            - object
+            - "null"
+          description: Information on the recipient.
+          properties:
+            name:
+              example: John Doe
+              type:
+                - string
+                - "null"
+            address:
+              example: 12515 Research Blvd
+              type:
+                - string
+                - "null"
+            postCode:
+              example: "78738"
+              type:
+                - string
+                - "null"
+            city:
+              example: city
+              type:
+                - string
+                - "null"
+            subdivision:
+              example: TX
+              type:
+                - string
+                - "null"
+    event:
+      type: object
+      x-internal: true
+      properties:
+        eventId:
+          type: string
+          description: Unique identifier of the event in Ship24 system.
+          example: c6fbe883-49dc-7cba-48c4-46c6efd29db6
+        trackingNumber:
+          type: string
+          description: The original tracking number used to create the Tracker.
+          example: S24DEMO169411
+        eventTrackingNumber:
+          type: string
+          description: The tracking number associated with the event, on which the event has been found.
+          example: S24DEMO169411
+        status:
+          type: string
+          nullable: true
+          description: Event raw text.
+          example: Delivered to the addressee
+        occurrenceDatetime:
+          type: string
+          format: logistic-date-time
+          description: "[Date and time](http://docs.ship24.com/data-format#logistics-date-and-time) at which the event occurred."
+          examples:
+            - "2021-03-04T17:12:57"
+            - "2021-03-04T10:12:57.000Z"
+            - "2021-03-04T10:12:57+02:00"
+            - "2021-03-04"
+        order:
+          type:
+            - integer
+            - "null"
+          nullable: true
+          description: Indicate the order of the events in case the occurrenceDatetime is the same between multiple events (lower is older).
+          example: null
+        location:
+          type:
+            - string
+            - "null"
+          nullable: true
+          description: Location raw text of the event.
+          example: "SAN RAFAEL, CA 94901"
+        sourceCode:
+          type:
+            - string
+            - "null"
+          nullable: true
+          description: Internal code of the source used to get this event. Please note that those codes may evolve at any point in time.
+          example: usps-tracking
+        courierCode:
+          type:
+            - string
+            - "null"
+          nullable: true
+          description: "Code of the courier linked to this event, refers to our Couriers list. Please note that those codes may evolve at any point in time."
+          example: us-post
+        statusCode:
+          type:
+            - string
+            - "null"
+          nullable: true
+          description: |
+            [statusCode](https://docs.ship24.com/status/#statuscode-and-statuscategory) of the event.
+          example: delivery_delivered
+        statusCategory:
+          type:
+            - string
+            - "null"
+          nullable: true
+          example: delivery
+          description: |
+            [statusCategory](https://docs.ship24.com/status/#statuscode-and-statuscategory) of the event.
+        statusMilestone:
+          type: string
+          example: delivered
+          description: "[statusMilestone](https://docs.ship24.com/status/#statusmilestone) of the shipment at the time of the event."
+        datetime:
+          deprecated: true
+          type: string
+          format: date-time
+        utcOffset:
+          deprecated: true
+          type: string
+        hasNoTime:
+          deprecated: true
+          type: boolean
+    error-response-format:
+      type: object
+      x-internal: true
+      title: Error response format
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              message:
+                type: string
+        data:
+          type:
+            - object
+            - "null"
+    tracker-create-request:
+      title: Tracker creation payload
+      type: object
+      x-internal: true
+      properties:
+        trackingNumber:
+          type: string
+          minLength: 5
+          maxLength: 50
+          example: S24DEMO456393
+          pattern: "^[a-zA-Z0-9-_/.]*$"
+          description: Tracking number of the shipment.
+        shipmentReference:
+          type: string
+          example: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+          description: Your reference for this shipment. Will be provided in our webhooks or API responses for this tracker.
+        clientTrackerId:
+          type: string
+          example: 3fa99515-3ca0-4901-85bb-056ee016799b
+          description: Your unique identifier for this shipment. Will be provided in our webhooks or API responses for this tracker.
+        originCountryCode:
+          type: string
+          example: CN
+          description: Sender country code.
+          format: ISO 3166-1 alpha-2/alpha-3
+        destinationCountryCode:
+          type: string
+          example: US
+          description: "Recipient country code - \U0001F4CC Recommended to improve tracking accuracy"
+          format: ISO 3166-1 alpha-2/alpha-3
+        destinationPostCode:
+          type: string
+          example: "94901"
+          description: "Recipient Post code (or ZIP code)  - \U0001F4CC Recommended to improve tracking accuracy"
+        shippingDate:
+          type: string
+          format: date-time
+          examples:
+            - "2021-03-01T11:09:00.000Z"
+            - "2021-03-01"
+            - "2021-03-01T11:09:00"
+            - "2021-03-01T11:09:00+02:00"
+          description: "Date at which the shipment has been shipped  - \U0001F4CC Recommended to improve tracking accuracy: providing the shipping date helps us accurately identify the shipment and improves our ability to retrieve the correct data. However, an inaccurate shipping date could cause our system to exclude the right shipment. Therefore, please ensure the provided shipping date aligns closely with the actual shipment date, give or take a few days. [Format](http://docs.ship24.com/data-format#logistics-date-and-time)"
+        courierCode:
+          type:
+            - array
+            - string
+          description: "Code of the courier(s) handling the shipment (Up to 3 max) (see Couriers list section)  - \U0001F4CC Recommended to improve tracking accuracy"
+          example:
+            - us-post
+          minItems: 0
+          maxItems: 3
+          items:
+            type: string
+        courierName:
+          type: string
+          description: Courier name and/or service.
+          example: USPS Standard
+        trackingUrl:
+          type: string
+          description: Tracking URL of the courier.
+          example: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
+        orderNumber:
+          type: string
+          description: Order number in case of an eCommerce order.
+          example: DF14R2022
+        title:
+          type: string
+          example: Nike shoes for Marc
+          description: "Title for this shipment, visible on the Tracking Dashboard."
+        recipient:
+          type: object
+          properties:
+            email:
+              type: string
+              example: recipient@email.com
+              description: "Recipient email, used for optional email notifications."
+              format: email
+            name:
+              type: string
+              example: Marc
+              description: "Recipient name, used for optional email notifications."
+        settings:
+          type: object
+          properties:
+            restrictTrackingToCourierCode:
+              type: boolean
+              example: true
+              description: "If set to `true`, the tracker will only track the courier(s) specified in the `courierCode` field, if any. Otherwise, Ship24 may extend the tracking to other providers in case the shipment is handled by additional couriers."
+      required:
+        - trackingNumber
+    reponse-standard-error:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              message:
+                type: string
+        data:
+          type: object
+          nullable: true
+      x-internal: true
+    bulk-create-trackers-request:
+      title: Bulk create trackers request
+      type: object
+      x-internal: true
+      properties:
+        trackers:
+          type: array
+          items:
+            $ref: "#/components/schemas/tracker-create-request"
+      required:
+        - trackers
+    bulk-create-trackers-response:
+      title: Bulk create trackers response
+      type: object
+      x-internal: true
+      properties:
+        status:
+          description: "Status of the bulk creation.\n\n`success`: All trackers were created successfully or already existed. (Status code 200)\n\n`partial`: Operation contains both successes and errors. (Status code 207)\n\n`error`: All creations failed or error on request level. (Status codes 400, 403)"
+          type: string
+          enum:
+            - success
+            - partial
+            - error
+        summary:
+          description: Summary of the bulk creation. Null if status is `error`.
+          type: object
+          nullable: true
+          properties:
+            totalInputs:
+              description: Total number of trackers to create.
+              type: integer
+            totalCreated:
+              description: Total number of trackers created.
+              type: integer
+            totalExisting:
+              description: Total number of already existing trackers.
+              type: integer
+            totalErrors:
+              description: Total number of errors (failed creations).
+              type: integer
+        data:
+          description: Detailed information about each tracker creation. Null if status is `error`.
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              itemStatus:
+                description: Status of the tracker creation.
+                type: string
+                enum:
+                  - created
+                  - existing
+                  - error
+              inputData:
+                description: Payload used to create the tracker.
+                $ref: "#/components/schemas/tracker-create-request"
+              tracker:
+                description: Tracker object. Null if `status` is `error`.
+                $ref: "#/components/schemas/tracker"
+                nullable: true
+              errors:
+                description: "[Error details](https://docs.ship24.com/errors#error-response-format) about a single tracker creation. Null if `itemStatus` is not `error`."
+                type: array
+                nullable: true
+                items:
+                  type: object
+                  properties:
+                    code:
+                      type: string
+                    message:
+                      type: string
+                  required:
+                    - code
+                    - message
+            required:
+              - itemStatus
+              - inputData
+        error:
+          description: "[Error details](https://docs.ship24.com/errors#error-response-format) of the request. Null if `status` is not `error`."
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+          required:
+            - code
+            - message
+      required:
+        - status
+  examples:
+    response-result-tracker:
+      description: Example
+      value:
+        data:
+          trackings:
+            - tracker:
+                trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+                trackingNumber: S24DEMO456393
+                shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                isSubscribed: true
+                isTracked: true
+                createdAt: "2021-03-10T05:13:00.000Z"
+              shipment:
+                shipmentId: f4f888d7-d140-423f-9a48-e0689d27e098
+                statusCode: delivery_delivered
+                statusCategory: delivery
+                statusMilestone: delivered
+                originCountryCode: US
+                destinationCountryCode: CN
+                delivery:
+                  estimatedDeliveryDate: null
+                  service: null
+                  signedBy: null
+                trackingNumbers:
+                  - tn: S24DEMO456393
+                  - tn: S24DEMO169411
+                recipient:
+                  name: null
+                  address: null
+                  postCode: "94901"
+                  city: null
+                  subdivision: null
+              events:
+                - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0f46
+                  trackingNumber: S24DEMO169411
+                  eventTrackingNumber: S24DEMO169411
+                  status: Delivered to the addressee
+                  occurrenceDatetime: "2021-03-04T17:12:57"
+                  order: null
+                  location: "SAN RAFAEL, CA 94901"
+                  sourceCode: usps-tracking
+                  courierCode: us-post
+                  statusCode: delivery_delivered
+                  statusCategory: delivery
+                  statusMilestone: delivered
+                - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a00ja
+                  trackingNumber: S24DEMO169411
+                  eventTrackingNumber: S24DEMO169411
+                  status: Out for Delivery
+                  occurrenceDatetime: "2021-03-04T10:12:57"
+                  order: null
+                  location: "SAN RAFAEL, CA 94901"
+                  sourceCode: usps-tracking
+                  courierCode: us-post
+                  statusCode: delivery_out_for_delivery
+                  statusCategory: delivery
+                  statusMilestone: out_for_delivery
+                - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0765
+                  trackingNumber: S24DEMO169411
+                  eventTrackingNumber: S24DEMO169411
+                  status: "Arrived at Hub, Your item arrived at the hub."
+                  occurrenceDatetime: "2021-03-04T06:12:57"
+                  order: null
+                  location: "SAN RAFAEL, CA 94901"
+                  sourceCode: usps-tracking
+                  courierCode: us-post
+                  statusCode: null
+                  statusCategory: null
+                  statusMilestone: in_transit
+                - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0f67
+                  trackingNumber: S24DEMO169411
+                  eventTrackingNumber: S24DEMO169411
+                  status: Processed Through Regional Facility
+                  occurrenceDatetime: "2021-03-03T17:12:57"
+                  order: null
+                  location: LOS ANGELES CA INTERNATIONAL DISTRIBUTION CENTER
+                  sourceCode: usps-tracking
+                  courierCode: us-post
+                  statusCode: null
+                  statusCategory: null
+                  statusMilestone: in_transit
+                - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0f24
+                  trackingNumber: S24DEMO169411
+                  eventTrackingNumber: S24DEMO169411
+                  status: Arrived at Regional Facility
+                  occurrenceDatetime: "2021-03-03T15:38:57"
+                  order: null
+                  location: LOS ANGELES CA INTERNATIONAL DISTRIBUTION CENTER
+                  sourceCode: usps-tracking
+                  courierCode: us-post
+                  statusCode: null
+                  statusCategory: null
+                  statusMilestone: in_transit
+                - eventId: 5adff7f7-c370-4026-9ff5-2ff4156ff2ff
+                  trackingNumber: S24DEMO169411
+                  eventTrackingNumber: S24DEMO456393
+                  status: Flight Departure
+                  occurrenceDatetime: "2021-03-02T23:24:50"
+                  order: null
+                  location: Beijing airport
+                  sourceCode: china-post-tracking
+                  courierCode: cn-post
+                  statusCode: null
+                  statusCategory: null
+                  statusMilestone: in_transit
+                - eventId: 918c20dc-9a9b-4588-bf62-ded9761d9621
+                  trackingNumber: S24DEMO169411
+                  eventTrackingNumber: S24DEMO456393
+                  status: Dispatched from Office of Exchange
+                  occurrenceDatetime: "2021-03-02T22:23:41"
+                  order: null
+                  location: Beijing
+                  sourceCode: china-post-tracking
+                  courierCode: cn-post
+                  statusCode: null
+                  statusCategory: null
+                  statusMilestone: in_transit
+                - eventId: b8dabe5f-1022-41c5-ad3a-8c8e4aacc965
+                  trackingNumber: S24DEMO169411
+                  eventTrackingNumber: S24DEMO456393
+                  status: Departure from Local Sorting Center
+                  occurrenceDatetime: "2021-03-02T19:24:57"
+                  order: null
+                  location: Beijing
+                  sourceCode: china-post-tracking
+                  courierCode: cn-post
+                  statusCode: null
+                  statusCategory: null
+                  statusMilestone: in_transit
+                - eventId: ee8ebe96-4eae-4a91-9a99-6f3afa6a0f45
+                  trackingNumber: S24DEMO169411
+                  eventTrackingNumber: S24DEMO456393
+                  status: Package Received
+                  occurrenceDatetime: "2021-03-02T15:38:57"
+                  order: null
+                  location: Beijing
+                  sourceCode: china-post-tracking
+                  courierCode: cn-post
+                  statusCode: null
+                  statusCategory: transit
+                  statusMilestone: in_transit
+              statistics:
+                timestamps:
+                  infoReceivedDatetime: "2021-03-02T15:38:57"
+                  inTransitDatetime: "2021-03-02T15:38:57"
+                  outForDeliveryDatetime: "2021-03-04T10:12:57"
+                  failedAttemptDatetime: null
+                  availableForPickupDatetime: null
+                  exceptionDatetime: null
+                  deliveredDatetime: "2021-03-04T17:12:57"
+    response-bulk-create-trackers-success:
+      description: Example1
+      value:
+        status: success
+        summary:
+          totalInputs: 2
+          totalCreated: 2
+          totalExisting: 0
+          totalErrors: 0
+        data:
+          - itemStatus: created
+            inputData:
+              trackingNumber: S24DEMO456393
+              shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+              clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+              originCountryCode: CN
+              destinationCountryCode: US
+              destinationPostCode: "94901"
+              shippingDate: "2021-03-01T11:09:00.000Z"
+              courierCode:
+                - us-post
+              courierName: USPS Standard
+              trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
+              orderNumber: DF14R2022
+              settings:
+                restrictTrackingToCourierCode: true
+            tracker:
+              trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+              trackingNumber: S24DEMO456393
+              shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+              clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+              isSubscribed: true
+              isTracked: true
+              createdAt: "2021-03-10T05:13:00.000Z"
+            errors: null
+          - itemStatus: created
+            inputData:
+              trackingNumber: S24DEMO788895
+              shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
+              clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
+              originCountryCode: CN
+              destinationCountryCode: US
+              destinationPostCode: "94901"
+              shippingDate: "2021-03-05T14:21:00.000Z"
+              courierCode:
+                - us-post
+              courierName: USPS
+              trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO788895"
+              orderNumber: DF14R2024
+              settings:
+                restrictTrackingToCourierCode: true
+            tracker:
+              trackerId: 001a975d-768d-4e16-a2b2-cff8a8f7e7fb
+              trackingNumber: S24DEMO788895
+              shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
+              clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
+              isSubscribed: true
+              isTracked: true
+              createdAt: "2021-03-10T05:13:00.000Z"
+            errors: null
+        error: null
+    response-bulk-create-trackers-partial:
+      value:
+        status: partial
+        summary:
+          totalInputs: 2
+          totalCreated: 1
+          totalExisting: 0
+          totalErrors: 1
+        data:
+          - itemStatus: created
+            inputData:
+              trackingNumber: S24DEMO456393
+              shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+              clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+              originCountryCode: CN
+              destinationCountryCode: US
+              destinationPostCode: "94901"
+              shippingDate: "2021-03-01T11:09:00.000Z"
+              courierCode:
+                - us-post
+              courierName: USPS Standard
+              trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
+              orderNumber: DF14R2022
+              settings:
+                restrictTrackingToCourierCode: true
+            tracker:
+              trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+              trackingNumber: S24DEMO456393
+              shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+              clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+              isSubscribed: true
+              isTracked: true
+              createdAt: "2021-03-10T05:13:00.000Z"
+            errors: null
+          - itemStatus: error
+            inputData:
+              trackingNumber: TEST
+            errors:
+              - code: validation_error
+                message: "The trackingNumber provided seems invalid. Please make sure it's between 5 and 50 characters, containing only letters, numbers, and hyphens, and without dummy patterns and consecutive numbers."
+        error: null
+    response-bulk-create-trackers-badRequest:
+      value:
+        status: error
+        summary:
+          totalInputs: 1
+          totalCreated: 0
+          totalExisting: 0
+          totalErrors: 1
+        data:
+          - itemStatus: error
+            inputData:
+              trackingNumber: TEST
+            tracker: null
+            errors:
+              - code: validation_error
+                message: "The trackingNumber provided seems invalid. Please make sure it's between 5 and 50 characters, containing only letters, numbers, and hyphens, and without dummy patterns and consecutive numbers."
+        error:
+          code: processing_error
+          message: "Every single item failed validation. Please refer to the error field for each item."
+    response-bulk-create-trackers-forbidden:
+      description: Example2
+      value:
+        status: "error"
+        summary: null
+        data: null
+        error:
+          code: "quota_limit_reached"
+          message: "No more quota left. Please update your plan."
+tags:
+  - name: "\U0001F4E6 Trackers"
+  - name: ⚓ Webhooks
+  - name: "\U0001F69A Couriers"
+  - name: ➕ API for per-call plans
+    description: |-
+      The **Tracking API (Per-call Plans)** is a specific product and associated endpoint on which usage is measured per API Call made. Each API call is synchronously fetching data from couriers which make it slower and more depend on courier's system availability.
+
+      Our standard "Per-shipment" product & plans remain the best choice as it offers more features, allow faster tracking information fetching with less dependency on courier's system availability at a lower cost overall.
+
+      > ⚠ You need an active "Per-call" subscription to use this endpoint.
+webhooks:
+  /your-endpoint:
+    head:
+      summary: Receive webhooks - Health check
+      description: |-
+        > This endpoint is **NOT** part of the Ship24 API but rather **has to be implemented on your side** in order to receive webhook messages.
+        Ship24 will be probing this endpoint using a HEAD request to make sure your server is ready to receive webhooks. A HEAD request and response don't contain any body, you just need to return a 200 OK HTTP code to our HEAD requests. [Learn how to set up and use webhooks](https://docs.ship24.com/webhooks/overview).
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          description: Ship24 will send your allocated webhook secret in each request.
+          example: Bearer your_webhook_secret
+      responses:
+        200:
+          description: Indicates that your server is ready to receive requests on this endpoint.
+      operationId: receive-webhooks-health-check
+    post:
+      summary: Receive webhooks - Tracking results
+      description: |-
+        > This endpoint is **NOT** part of the Ship24 API but rather **has to be implemented on your side** in order to receive webhook messages.
+        Ship24 will be pushing tracking results to your endpoint using a `trackings` array containing `tracking` objects. The `tracking` object is detailed below as well as in [Schemas > Tracking](/schemas/tracking). [Learn how to set up and use webhooks](https://docs.ship24.com/webhooks/overview).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                trackings:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      metadata:
+                        $ref: "#/components/schemas/metadata"
+                      tracker:
+                        $ref: "#/components/schemas/tracker"
+                      shipment:
+                        $ref: "#/components/schemas/shipment"
+                      events:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/event"
+                      statistics:
+                        $ref: "#/components/schemas/statistics"
+            examples:
+              Valid request:
+                value:
+                  trackings:
+                    - metadata:
+                        generatedAt: "2023-01-19T09:12:39.052Z"
+                        messageId: "356a7f93-3ce5-4b49-b560-156537283df9"
+                      tracker:
+                        trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+                        trackingNumber: S24DEMO456393
+                      shipment:
+                        shipmentId: f4f888d7-d140-423f-9a48-e0689d27e098
+                        statusCode: delivery_delivered
+                        statusCategory: delivery
+                        statusMilestone: delivered
+                        originCountryCode: US
+                        destinationCountryCode: CN
+                        delivery:
+                          estimatedDeliveryDate: null
+                          service: null
+                          signedBy: null
+                        trackingNumbers:
+                          - tn: S24DEMO456393
+                          - tn: S24DEMO169411
+                        recipient:
+                          name: null
+                          address: null
+                          postCode: "94901"
+                          city: null
+                          subdivision: null
+                      events:
+                        - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0f46
+                          trackingNumber: S24DEMO169411
+                          eventTrackingNumber: S24DEMO169411
+                          status: Delivered to the addressee
+                          occurrenceDatetime: "2021-03-04T17:12:57"
+                          order: null
+                          location: "SAN RAFAEL, CA 94901"
+                          sourceCode: usps-tracking
+                          courierCode: us-post
+                          statusCode: delivery_delivered
+                          statusCategory: delivery
+                          statusMilestone: delivered
+                        - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a00ja
+                          trackingNumber: S24DEMO169411
+                          eventTrackingNumber: S24DEMO169411
+                          status: Out for Delivery
+                          occurrenceDatetime: "2021-03-04T10:12:57"
+                          order: null
+                          location: "SAN RAFAEL, CA 94901"
+                          sourceCode: usps-tracking
+                          courierCode: us-post
+                          statusCode: delivery_out_for_delivery
+                          statusCategory: delivery
+                          statusMilestone: out_for_delivery
+                        - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0765
+                          trackingNumber: S24DEMO169411
+                          eventTrackingNumber: S24DEMO169411
+                          status: "Arrived at Hub, Your item arrived at the hub."
+                          occurrenceDatetime: "2021-03-04T06:12:57"
+                          order: null
+                          location: "SAN RAFAEL, CA 94901"
+                          sourceCode: usps-tracking
+                          courierCode: us-post
+                          statusCode: null
+                          statusCategory: null
+                          statusMilestone: in_transit
+                        - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0f67
+                          trackingNumber: S24DEMO169411
+                          eventTrackingNumber: S24DEMO169411
+                          status: Processed Through Regional Facility
+                          occurrenceDatetime: "2021-03-03T17:12:57"
+                          order: null
+                          location: LOS ANGELES CA INTERNATIONAL DISTRIBUTION CENTER
+                          sourceCode: usps-tracking
+                          courierCode: us-post
+                          statusCode: null
+                          statusCategory: null
+                          statusMilestone: in_transit
+                        - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0f24
+                          trackingNumber: S24DEMO169411
+                          eventTrackingNumber: S24DEMO169411
+                          status: Arrived at Regional Facility
+                          occurrenceDatetime: "2021-03-03T15:38:57"
+                          order: null
+                          location: LOS ANGELES CA INTERNATIONAL DISTRIBUTION CENTER
+                          sourceCode: usps-tracking
+                          courierCode: us-post
+                          statusCode: null
+                          statusCategory: null
+                          statusMilestone: in_transit
+                        - eventId: 5adff7f7-c370-4026-9ff5-2ff4156ff2ff
+                          trackingNumber: S24DEMO169411
+                          eventTrackingNumber: S24DEMO456393
+                          status: Flight Departure
+                          occurrenceDatetime: "2021-03-02T23:24:50"
+                          order: null
+                          location: Beijing airport
+                          sourceCode: china-post-tracking
+                          courierCode: cn-post
+                          statusCode: null
+                          statusCategory: null
+                          statusMilestone: in_transit
+                        - eventId: 918c20dc-9a9b-4588-bf62-ded9761d9621
+                          trackingNumber: S24DEMO169411
+                          eventTrackingNumber: S24DEMO456393
+                          status: Dispatched from Office of Exchange
+                          occurrenceDatetime: "2021-03-02T22:23:41"
+                          order: null
+                          location: Beijing
+                          sourceCode: china-post-tracking
+                          courierCode: cn-post
+                          statusCode: null
+                          statusCategory: null
+                          statusMilestone: in_transit
+                        - eventId: b8dabe5f-1022-41c5-ad3a-8c8e4aacc965
+                          trackingNumber: S24DEMO169411
+                          eventTrackingNumber: S24DEMO456393
+                          status: Departure from Local Sorting Center
+                          occurrenceDatetime: "2021-03-02T19:24:57"
+                          order: null
+                          location: Beijing
+                          sourceCode: china-post-tracking
+                          courierCode: cn-post
+                          statusCode: null
+                          statusCategory: null
+                          statusMilestone: in_transit
+                        - eventId: ee8ebe96-4eae-4a91-9a99-6f3afa6a0f45
+                          trackingNumber: S24DEMO169411
+                          eventTrackingNumber: S24DEMO456393
+                          status: Package Received
+                          occurrenceDatetime: "2021-03-02T15:38:57"
+                          order: null
+                          location: Beijing
+                          sourceCode: china-post-tracking
+                          courierCode: cn-post
+                          statusCode: null
+                          statusCategory: transit
+                          statusMilestone: in_transit
+                      statistics:
+                        timestamps:
+                          infoReceivedDatetime: "2021-03-02T15:38:57"
+                          inTransitDatetime: "2021-03-02T15:38:57"
+                          outForDeliveryDatetime: "2021-03-04T10:12:57"
+                          failedAttemptDatetime: null
+                          availableForPickupDatetime: null
+                          exceptionDatetime: null
+                          deliveredDatetime: "2021-03-04T17:12:57"
+        description: "Ship24 will send the following JSON body:"
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          description: Ship24 will send your allocated webhook secret in each request.
+          example: Bearer your_webhook_secret
+      responses:
+        200:
+          description: Indicates that your server successfully processed Ship24's request.
+      operationId: receive-webhooks-tracking-results
+paths:
+  /public/v1/trackers:
+    post:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: Create a tracker
+      description: |-
+        This endpoint allows you to create a new `Tracker`, based on the specified information. Once a `Tracker` is created, you will be able to receive webhook notifications and/or fetch its tracking result.
+
+        > This endpoint is idempotent, any subsequent calls with the same parameters won't duplicate `Tracker`. However, providing different information in any of the fields will create a new `Tracker`, as it will be considered as a new shipment.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/tracker-create-request"
+            examples:
+              Valid request:
+                value:
+                  trackingNumber: S24DEMO456393
+                  shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                  clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                  originCountryCode: CN
+                  destinationCountryCode: US
+                  destinationPostCode: "94901"
+                  shippingDate: "2021-03-01T11:09:00.000Z"
+                  courierCode:
+                    - us-post
+                  courierName: USPS Standard
+                  trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
+                  orderNumber: DF14R2022
+                  settings:
+                    restrictTrackingToCourierCode: true
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json; charset=utf-8
+          description: application/json; charset=utf-8
+          required: true
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+      operationId: create-tracker
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      tracker:
+                        $ref: "#/components/schemas/tracker"
+              examples:
+                Success:
+                  value:
+                    data:
+                      tracker:
+                        trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+                        trackingNumber: S24DEMO456393
+                        shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                        clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                        isSubscribed: true
+                        isTracked: true
+                        createdAt: "2021-03-10T05:13:00.000Z"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-response-format"
+              examples:
+                Invalid tracking number:
+                  value:
+                    errors:
+                      - code: validation_error
+                        message: "The trackingNumber provided seems invalid. Please make sure it's between 5 and 50 characters, containing only letters, numbers, and hyphens, and without dummy patterns and consecutive numbers."
+                    data: null
+  /public/v1/trackers/bulk:
+    post:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: Bulk create trackers
+      description: |-
+        This endpoint allows you to create up to 100 new `Trackers` in a single operation, based on the specified information. Once the `Trackers` are created, you will be able to receive webhook notifications and/or fetch their tracking results.
+
+        > While tracker creation is idempotent, this endpoint itself is not. Any duplicate within the request or any tracker parameters matching an existing tracker will not create a duplicate `Tracker`. However, providing different information in any of the fields will create a new `Tracker`, as it will be considered as a new shipment.
+
+        The response will include a summary of:
+        - The number of trackers successfully created.
+        - The number of trackers ignored because they already exist.
+        - The number of trackers that could not be created due to errors.
+
+        Additionally, the response will provide details about the created trackers and any errors that occurred during the tracker creation process.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/bulk-create-trackers-request"
+            examples:
+              Valid request:
+                value:
+                  - trackingNumber: S24DEMO456393
+                    shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                    clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                    originCountryCode: CN
+                    destinationCountryCode: US
+                    destinationPostCode: "94901"
+                    shippingDate: "2021-03-01T11:09:00.000Z"
+                    courierCode:
+                      - us-post
+                    courierName: USPS Standard
+                    trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
+                    orderNumber: DF14R2022
+                    settings:
+                      restrictTrackingToCourierCode: true
+                  - trackingNumber: S24DEMO788895
+                    shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
+                    clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
+                    originCountryCode: CN
+                    destinationCountryCode: US
+                    destinationPostCode: "94901"
+                    shippingDate: "2021-03-05T14:21:00.000Z"
+                    courierCode:
+                      - us-post
+                    courierName: USPS
+                    trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO788895"
+                    orderNumber: DF14R2024
+                    settings:
+                      restrictTrackingToCourierCode: true
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json; charset=utf-8
+          description: application/json; charset=utf-8
+          required: true
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+      operationId: bulk-create-trackers
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bulk-create-trackers-response"
+              examples:
+                Success:
+                  $ref: "#/components/examples/response-bulk-create-trackers-success"
+        207:
+          description: Partially Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bulk-create-trackers-response"
+              examples:
+                Partial:
+                  $ref: "#/components/examples/response-bulk-create-trackers-partial"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bulk-create-trackers-response"
+              examples:
+                Bad request:
+                  $ref: "#/components/examples/response-bulk-create-trackers-badRequest"
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bulk-create-trackers-response"
+              examples:
+                Forbidden:
+                  $ref: "#/components/examples/response-bulk-create-trackers-forbidden"
+    get:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: List existing Trackers
+      description: "This endpoint return a list of all existing `Trackers`, using page-based pagination."
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+          description: The page index, starting from 1.
+          example: 1
+          required: true
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+          description: The maximum number of trackers returned per page.
+          example: 100
+          required: true
+        - name: sort
+          in: query
+          schema:
+            type: integer
+            enum: [1, -1]
+          description: Defines the sorting order of trackers. Use `1` for ascending (`createdAt` oldest first) and `-1` for descending (`createdAt` newest first). The default is ascending (`1`) to ensure stable pagination.
+          example: 1
+          required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      trackers:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/tracker"
+              examples:
+                Success:
+                  value:
+                    data:
+                      trackers:
+                        - trackerId: 0018fa7d-0040-478c-9043-70c3e240e7b3
+                          trackingNumber: S24DEMO456393
+                          shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                          clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.181Z"
+                        - trackerId: 001a975d-768d-4e16-a2b2-cff8a8f7e7fb
+                          trackingNumber: "S24DEMO788895"
+                          shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
+                          clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.179Z"
+                        - trackerId: 002be605-6098-444c-8dff-762b314438ef
+                          trackingNumber: LA680658838NL
+                          shipmentReference: null
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.189Z"
+                        - trackerId: 0035a920-c41b-4d12-8c2a-65b13a5da389
+                          trackingNumber: LT621980897
+                          shipmentReference: null
+                          clientTrackerId: null
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.195Z"
+                        - trackerId: 004cece2-1a17-407f-97f8-9fd077dfa6b6
+                          trackingNumber: "00340434639921278870"
+                          shipmentReference: null
+                          clientTrackerId: null
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.196Z"
+                        - trackerId: 0077a6e2-39a3-48b7-a91f-e6e4f2bb9422
+                          trackingNumber: H00F6A0043571732
+                          shipmentReference: null
+                          clientTrackerId: null
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.189Z"
+                        - trackerId: 008a8ebc-28d5-427b-92c4-4ab4a54e9eef
+                          trackingNumber: SYRM129017918
+                          shipmentReference: null
+                          clientTrackerId: null
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.187Z"
+                        - trackerId: 00969ba9-9d16-4b14-803c-c47737cd0ece
+                          trackingNumber: LY396870931DE
+                          shipmentReference: null
+                          clientTrackerId: null
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.182Z"
+                        - trackerId: 0098fa69-fa43-42c3-b315-6e72245f2f4c
+                          trackingNumber: H00F6A0041475344
+                          shipmentReference: null
+                          clientTrackerId: null
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.180Z"
+                        - trackerId: 00b0ec18-ed69-48bc-90c0-8f5349f0fb5b
+                          trackingNumber: H00F6A0043810576
+                          shipmentReference: null
+                          clientTrackerId: null
+                          isSubscribed: true
+                          isTracked: true
+                          createdAt: "2022-12-23T10:55:39.194Z"
+            application/xml:
+              schema:
+                type: object
+                properties:
+                  "":
+                    type: string
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  trackingNumber:
+                    type: string
+                  shipmentReference:
+                    type: string
+                  clientTrackerId:
+                    type: string
+                  originCountryCode:
+                    type: string
+                  destinationCountryCode:
+                    type: string
+                  destinationPostCode:
+                    type: string
+                  shippingDate:
+                    type: string
+                    format: date-time
+                  courierCode:
+                    type: array
+                    items:
+                      type: string
+                  courierName:
+                    type: string
+                  trackingUrl:
+                    type: string
+      operationId: list-trackers
+    parameters: []
+  /public/v1/trackers/track:
+    post:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: Create a tracker and get tracking results
+      description: "This endpoint creates a new `Tracker` on the specified tracking number , if it does not exist, and returns the tracking results directly. We advise using this endpoint if you are not interested in receiving webhook notifications and just want to fetch tracking results. This way, you can always call this unified endpoint to get tracking results, without worrying about `Tracker` creation and management.\n\n\n> \U0001F6D1 During the very first call for a tracking number, this endpoint will create a `Tracker` and try to return tracking results synchronously if the courier allows it, which can delay the initial answer, at the benefit of getting the tracking results from the first call. **Initial response time may range from a few seconds, up to 1 minute, and results will depend on the courier's system availability at that time.** Subsequent calls will be instantaneous as the `Tracker` will already exist with tracking results ready to use and constantly updated.\n\n> This endpoint is idempotent, any subsequent calls with the same parameters won't duplicate `Tracker`. However, providing different information in any of the fields will create a new `Tracker` as it will be considered as a new shipment."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/tracker-create-request"
+            examples:
+              Valid request:
+                value:
+                  trackingNumber: S24DEMO456393
+                  shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                  clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                  originCountryCode: CN
+                  destinationCountryCode: US
+                  destinationPostCode: "94901"
+                  shippingDate: "2021-03-01T11:09:00.000Z"
+                  courierCode:
+                    - us-post
+                  courierName: USPS Standard
+                  trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
+                  orderNumber: DF14R2022
+                  settings:
+                    restrictTrackingToCourierCode: true
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json; charset=utf-8
+          description: application/json; charset=utf-8
+          required: true
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      trackings:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            tracker:
+                              $ref: "#/components/schemas/tracker"
+                            shipment:
+                              $ref: "#/components/schemas/shipment"
+                            events:
+                              type: array
+                              items:
+                                $ref: "#/components/schemas/event"
+                            statistics:
+                              $ref: "#/components/schemas/statistics"
+              examples:
+                Success:
+                  $ref: "#/components/examples/response-result-tracker"
+      operationId: create-tracker-and-get-tracking-results
+  "/public/v1/trackers/{trackerId}":
+    get:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: Get an existing tracker
+      description: This endpoint return an existing `Tracker` for a given `trackerId`.
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+        - name: trackerId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "**Required** Id of the tracker, provided by Ship24 at creation. `clientTrackerId` can also be used in this field by employing the `searchBy` parameter."
+          example: 26148317-7502-d3ac-44a9-546d240ac0dd
+        - name: searchBy
+          in: query
+          schema:
+            type: string
+            enum: ["trackerId", "clientTrackerId"]
+          example: trackerId
+          description: "Parameter allowing to search either by `trackerId`or `clientTrackerId`. Default behavior is by `trackerId`."
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tracker"
+              examples:
+                Success:
+                  value:
+                    data:
+                      tracker:
+                        trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+                        trackingNumber: S24DEMO456393
+                        shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                        clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                        isSubscribed: true
+                        isTracked: true
+                        createdAt: "2021-03-10T05:13:00.000Z"
+          description: OK
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-response-format"
+              examples:
+                Not found:
+                  value:
+                    errors:
+                      - code: tracker_not_found
+                        message: Tracker not found.
+                    data: null
+      operationId: get-tracker-by-trackerId
+    patch:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: Update an existing tracker
+      description: "This endpoint allows to modify an existing `Tracker` matching with the given\_`trackerId`.  \n\n> Once the Tracker has gathered shipment tracking information, certain fields related to the shipment data cannot be modified. These include: \n> - `courierCode` \n> - `originCountryCode` \n> - `destinationCountryCode` \n> - `destinationPostCode` \n> - `shippingDate`"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isSubscribed:
+                  type: boolean
+                  example: false
+                  description: Setting at `false` will unsubscribe you from the `Tracker`. Once unsubscribed, you will still be able to fetch the existing tracking results but Ship24 won't search for new data or send webhook notifications. `Trackers` are automatically disabled after the parcel delivery or after a long period without any new events. Manually unsubscribing your tracker is not useful, except if you wish to stop receiving webhooks on it or if you need to reuse the `clientTrackerId` value in a new `Tracker`.
+                courierCode:
+                  type:
+                    - array
+                    - string
+                  description: "Code of the courier(s) handling the shipment (Up to 3 max) (see Couriers list section)  - \U0001F4CC Recommended to improve tracking accuracy"
+                  example:
+                    - us-post
+                  minItems: 0
+                  maxItems: 3
+                  items:
+                    type: string
+                originCountryCode:
+                  type: string
+                  example: CN
+                  description: Sender country code.
+                  format: ISO 3166-1 alpha-2/alpha-3
+                destinationCountryCode:
+                  type: string
+                  example: US
+                  description: "Recipient country code - \U0001F4CC Recommended to improve tracking accuracy"
+                  format: ISO 3166-1 alpha-2/alpha-3
+                destinationPostCode:
+                  type: string
+                  example: "94901"
+                  description: "Recipient Post code (or ZIP code)  - \U0001F4CC Recommended to improve tracking accuracy"  
+                shippingDate:
+                  type: string
+                  format: date-time
+                  examples:
+                    - "2021-03-01T11:09:00.000Z"
+                    - "2021-03-01"
+                    - "2021-03-01T11:09:00"
+                    - "2021-03-01T11:09:00+02:00"
+                  description: "Date at which the shipment has been shipped  - \U0001F4CC Recommended to improve tracking accuracy: providing the shipping date helps us accurately identify the shipment and improves our ability to retrieve the correct data. However, an inaccurate shipping date could cause our system to exclude the right shipment. Therefore, please ensure the provided shipping date aligns closely with the actual shipment date, give or take a few days. [Format](http://docs.ship24.com/data-format#logistics-date-and-time)"
+            examples:
+              Patching:
+                value:
+                  isSubscribed: false
+                  originCountryCode: CN
+                  destinationCountryCode: US
+                  destinationPostCode: "94901"
+                  shippingDate: "2021-03-01T11:09:00.000Z"
+                  courierCode:
+                    - us-post
+        description: "Only the following property can be updated on a Tracker:"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json; charset=utf-8
+          description: application/json; charset=utf-8
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+        - name: trackerId
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 26148317-7502-d3ac-44a9-546d240ac0dd
+          description: "**Required** Id of the tracker, provided by Ship24 at creation. `clientTrackerId` can also be used in this field by employing the `searchBy` parameter."
+        - name: searchBy
+          in: query
+          schema:
+            type: string
+            enum: ["trackerId", "clientTrackerId"]
+          example: trackerId
+          description: "Parameter allowing to search either by `trackerId`or `clientTrackerId`. Default behavior is by `trackerId`."
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tracker"
+              examples:
+                Successfully updated:
+                  value:
+                    data:
+                      tracker:
+                        trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+                        trackingNumber: S24DEMO456393
+                        shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                        clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                        isSubscribed: true
+                        isTracked: true
+                        createdAt: "2021-03-10T05:13:00.000Z"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-response-format"
+              examples:
+                Update refused:
+                  value:
+                    errors:
+                      - code: tracker_not_updatable
+                        message: This Tracker can't be updated as the corresponding shipment has been already processed by our system. Please create a new Tracker.
+                    data: null
+      operationId: update-tracker-by-trackerId
+  "/public/v1/trackers/search/{trackingNumber}/results":
+    get:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: Get tracking results for existing trackers by tracking number
+      description: |-
+        This endpoint will return the `tracking` result corresponding to the tracking number provided as a parameter. 
+
+        The `tracking` object is detailed in the [SCHEMAS](/schemas/tracking) section. 
+
+        Unlike the `/v1/trackers/track` endpoint, a **`Tracker`** **must first be created on this tracking number before using this endpoint.** As a tracking number is not unique, the endpoint may return multiple `trackings` associated with different `Trackers`.
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+        - name: trackingNumber
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "**Required** Tracking number of the parcel."
+          example: S24DEMO456393
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      trackings:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            tracker:
+                              $ref: "#/components/schemas/tracker"
+                            shipment:
+                              $ref: "#/components/schemas/shipment"
+                            events:
+                              type: array
+                              items:
+                                $ref: "#/components/schemas/event"
+                            statistics:
+                              $ref: "#/components/schemas/statistics"
+              examples:
+                Success:
+                  $ref: "#/components/examples/response-result-tracker"
+      operationId: get-tracking-results-of-trackers-by-tracking-number
+  "/public/v1/trackers/{trackerId}/results":
+    get:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: Get tracking results for an existing tracker
+      description: |-
+        This endpoint return the `Tracking` results of an existing `Tracker` matching with the given trackerId. As trackerId are unique, the `Trackings` array will always have only one item. 
+
+        The `tracking` object is detailed in the [SCHEMAS](/schemas/tracking) section.
+
+        Unlike the `/v1/trackers/track` endpoint, a **`Tracker`** **must first be created on this tracking number before using this endpoint.** As a tracking number is not unique, the endpoint may return multiple `trackings` associated with different `Trackers`.
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+        - name: trackerId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "**Required** Id of the tracker, provided by Ship24 at creation. `clientTrackerId` can also be used in this field by employing the `searchBy` parameter."
+          example: 26148317-7502-d3ac-44a9-546d240ac0dd
+        - name: searchBy
+          in: query
+          schema:
+            type: string
+            enum: ["trackerId", "clientTrackerId"]
+          example: trackerId
+          description: "Parameter allowing to search either by `trackerId`or `clientTrackerId`. Default behavior is by `trackerId`."
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      trackings:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            tracker:
+                              $ref: "#/components/schemas/tracker"
+                            shipment:
+                              $ref: "#/components/schemas/shipment"
+                            events:
+                              type: array
+                              items:
+                                $ref: "#/components/schemas/event"
+                            statistics:
+                              $ref: "#/components/schemas/statistics"
+              examples:
+                Success:
+                  $ref: "#/components/examples/response-result-tracker"
+          description: OK
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-response-format"
+              examples:
+                Tracker not found:
+                  value:
+                    errors:
+                      - code: tracker_not_found
+                        message: Tracker not found.
+                    data: null
+      operationId: get-tracking-results-of-tracker-by-trackerId
+  /public/v1/couriers:
+    get:
+      tags:
+        - "\U0001F69A Couriers"
+      summary: Get all couriers
+      description: This endpoint will return the list of all couriers supported by Ship24, identified by their `courierCode`.
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      couriers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            courierCode:
+                              type: string
+                              example: "us-post"
+                              description: "The codified code of this courier in Ship24 system."
+                            courierName:
+                              type: string
+                              example: "USPS"
+                              description: "The courier name."
+                            website:
+                              type:
+                                - string
+                                - "null"
+                              example: "https://www.usps.com"
+                              description: "The courier public website."
+                            isPost:
+                              type: boolean
+                              example: true
+                              description: "`true` in case the courier is a postal operator."
+                            countryCode:
+                              type:
+                                - string
+                                - "null"
+                              format: ISO 3166-1 alpha-2
+                              example: "US"
+                              description: "The main country in which the courier is operating."
+                            requiredFields:
+                              type:
+                                - array
+                                - "null"
+                              items:
+                                type: string
+                                enum:
+                                  [destinationPostCode, destinationCountryCode]
+                              example: null
+                              description: "Indicate which additional information is required by the courier to get optimal tracking results. See [Additional information](https://docs.ship24.com/couriers#required-fields)"
+                            isDeprecated:
+                              type:
+                                - boolean
+                              example: false
+                              description: "`true` in case the courier is deprecated. See [Deprecated couriers](https://docs.ship24.com/couriers#deprecated-couriers)"
+              examples:
+                success:
+                  value:
+                    data:
+                      couriers:
+                        - courierCode: us-post
+                          courierName: USPS
+                          website: "https://www.usps.com"
+                          isPost: true
+                          countryCode: US
+                          requiredFields: null
+                          isDeprecated: false
+                        - courierCode: fr-post
+                          courierName: La Poste
+                          website: "http://www.laposte.fr/"
+                          isPost: true
+                          countryCode: FR
+                          requiredFields: null
+                          isDeprecated: false
+                        - courierCode: palletways
+                          courierName: Palletways
+                          website: "https://www.palletways.com/"
+                          isPost: false
+                          countryCode: null
+                          requiredFields: ["destinationPostCode"]
+                          isDeprecated: false
+      operationId: get-couriers
+  /public/v1/tracking/search:
+    post:
+      tags:
+        - ➕ API for per-call plans
+      summary: Get tracking results by tracking number
+      description: "This endpoint will return the `tracking` corresponding to the tracking number provided as a parameter. \n\nThe `tracking` object is detailed in the [SCHEMAS](/schemas/tracking) section.\n\nFor better accuracy, we strongly advise to provide extra information such as the origin country, destination postcode & country, and the shipping date.\n\n> \U0001F6D1 You need an active \"Per-call\" subscription to use this endpoint. Our standard \"Per-shipment\" product & plans remain the best choice as it offers more features, allow faster tracking information fetching with less dependency on courier's system availability at a lower cost overall.\n\n\n> \U0001F6D1 As this endpoint is synchronously fetching tracking results from couriers, **response time may be up to 1 minute, and results depend on the courier's system availability** at the time of the call."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                trackingNumber:
+                  type: string
+                  minLength: 5
+                  maxLength: 50
+                  example: S24DEMO456393
+                  pattern: "^[a-zA-Z0-9-_/.]*$"
+                  description: Tracking number of the shipment.
+                originCountryCode:
+                  type: string
+                  example: CN
+                  description: Sender country code.
+                  format: ISO 3166-1 alpha-2/alpha-3
+                destinationPostCode:
+                  type: string
+                  example: US
+                  description: "Recipient country code - \U0001F4CC Recommended to improve tracking accuracy"
+                shippingDate:
+                  type: string
+                  examples:
+                    - "2021-03-01T11:09:00.000Z"
+                    - "2021-03-01"
+                    - "2021-03-01T11:09:00"
+                    - "2021-03-01T11:09:00+02:00"
+                  description: "Date at which the shipment has been shipped  - \U0001F4CC Recommended to improve tracking accuracy: providing the shipping date helps us accurately identify the shipment and improves our ability to retrieve the correct data. However, an inaccurate shipping date could cause our system to exclude the right shipment. Therefore, please ensure the provided shipping date aligns closely with the actual shipment date, give or take a few days. [Format](http://docs.ship24.com/data-format#logistics-date-and-time)"
+                  format: date-time
+                courierCode:
+                  type:
+                    - array
+                    - string
+                  description: "Code of the courier(s) handling the shipment (Up to 3 max) (see Couriers list section)  - \U0001F4CC Recommended to improve tracking accuracy"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json; charset=utf-8
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      trackings:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            shipment:
+                              $ref: "#/components/schemas/shipment"
+                            events:
+                              type: array
+                              items:
+                                $ref: "#/components/schemas/event"
+                            statistics:
+                              $ref: "#/components/schemas/statistics"
+              examples:
+                Success:
+                  value:
+                    data:
+                      trackings:
+                        - shipment:
+                            shipmentId: f4f888d7-d140-423f-9a48-e0689d27e098
+                            statusCode: delivery_delivered
+                            statusCategory: delivery
+                            statusMilestone: delivered
+                            originCountryCode: US
+                            destinationCountryCode: CN
+                            delivery:
+                              estimatedDeliveryDate: null
+                              service: null
+                              signedBy: null
+                            trackingNumbers:
+                              - tn: S24DEMO456393
+                              - tn: S24DEMO169411
+                            recipient:
+                              name: null
+                              address: null
+                              postCode: "94901"
+                              city: null
+                              subdivision: null
+                          events:
+                            - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0f46
+                              trackingNumber: S24DEMO169411
+                              eventTrackingNumber: S24DEMO169411
+                              status: Delivered to the addressee
+                              occurrenceDatetime: "2021-03-04T17:12:57"
+                              order: null
+                              location: "SAN RAFAEL, CA 94901"
+                              sourceCode: usps-tracking
+                              courierCode: us-post
+                              statusCode: delivery_delivered
+                              statusCategory: delivery
+                              statusMilestone: delivered
+                            - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a00ja
+                              trackingNumber: S24DEMO169411
+                              eventTrackingNumber: S24DEMO169411
+                              status: Out for Delivery
+                              occurrenceDatetime: "2021-03-04T10:12:57"
+                              order: null
+                              location: "SAN RAFAEL, CA 94901"
+                              sourceCode: usps-tracking
+                              courierCode: us-post
+                              statusCode: delivery_out_for_delivery
+                              statusCategory: delivery
+                              statusMilestone: out_for_delivery
+                            - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0765
+                              trackingNumber: S24DEMO169411
+                              eventTrackingNumber: S24DEMO169411
+                              status: "Arrived at Hub, Your item arrived at the hub."
+                              occurrenceDatetime: "2021-03-04T06:12:57"
+                              order: null
+                              location: "SAN RAFAEL, CA 94901"
+                              sourceCode: usps-tracking
+                              courierCode: us-post
+                              statusCode: null
+                              statusCategory: null
+                              statusMilestone: in_transit
+                            - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0f67
+                              trackingNumber: S24DEMO169411
+                              eventTrackingNumber: S24DEMO169411
+                              status: Processed Through Regional Facility
+                              occurrenceDatetime: "2021-03-03T17:12:57"
+                              order: null
+                              location: LOS ANGELES CA INTERNATIONAL DISTRIBUTION CENTER
+                              sourceCode: usps-tracking
+                              courierCode: us-post
+                              statusCode: null
+                              statusCategory: null
+                              statusMilestone: in_transit
+                            - eventId: ee8ebe96-4eae-4a91-9a99-8f3afa6a0f24
+                              trackingNumber: S24DEMO169411
+                              eventTrackingNumber: S24DEMO169411
+                              status: Arrived at Regional Facility
+                              occurrenceDatetime: "2021-03-03T15:38:57"
+                              order: null
+                              location: LOS ANGELES CA INTERNATIONAL DISTRIBUTION CENTER
+                              sourceCode: usps-tracking
+                              courierCode: us-post
+                              statusCode: null
+                              statusCategory: null
+                              statusMilestone: in_transit
+                            - eventId: 5adff7f7-c370-4026-9ff5-2ff4156ff2ff
+                              trackingNumber: S24DEMO169411
+                              eventTrackingNumber: S24DEMO456393
+                              status: Flight Departure
+                              occurrenceDatetime: "2021-03-02T23:24:50"
+                              order: null
+                              location: Beijing airport
+                              sourceCode: china-post-tracking
+                              courierCode: cn-post
+                              statusCode: null
+                              statusCategory: null
+                              statusMilestone: in_transit
+                            - eventId: 918c20dc-9a9b-4588-bf62-ded9761d9621
+                              trackingNumber: S24DEMO169411
+                              eventTrackingNumber: S24DEMO456393
+                              status: Dispatched from Office of Exchange
+                              occurrenceDatetime: "2021-03-02T22:23:41"
+                              order: null
+                              location: Beijing
+                              sourceCode: china-post-tracking
+                              courierCode: cn-post
+                              statusCode: null
+                              statusCategory: null
+                              statusMilestone: in_transit
+                            - eventId: b8dabe5f-1022-41c5-ad3a-8c8e4aacc965
+                              trackingNumber: S24DEMO169411
+                              eventTrackingNumber: S24DEMO456393
+                              status: Departure from Local Sorting Center
+                              occurrenceDatetime: "2021-03-02T19:24:57"
+                              order: null
+                              location: Beijing
+                              sourceCode: china-post-tracking
+                              courierCode: cn-post
+                              statusCode: null
+                              statusCategory: null
+                              statusMilestone: in_transit
+                            - eventId: ee8ebe96-4eae-4a91-9a99-6f3afa6a0f45
+                              trackingNumber: S24DEMO169411
+                              eventTrackingNumber: S24DEMO456393
+                              status: Package Received
+                              occurrenceDatetime: "2021-03-02T15:38:57"
+                              order: null
+                              location: Beijing
+                              sourceCode: china-post-tracking
+                              courierCode: cn-post
+                              statusCode: null
+                              statusCategory: transit
+                              statusMilestone: in_transit
+                          statistics:
+                            timestamps:
+                              infoReceivedDatetime: "2021-03-02T15:38:57"
+                              inTransitDatetime: "2021-03-02T15:38:57"
+                              outForDeliveryDatetime: "2021-03-04T10:12:57"
+                              failedAttemptDatetime: null
+                              availableForPickupDatetime: null
+                              exceptionDatetime: null
+                              deliveredDatetime: "2021-03-04T17:12:57"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error-response-format"
+              example:
+                errors:
+                  - code: validation_error
+                    message: Please make sure that destinationCountryCode is a valid country code and is in ISO 3166-1 alpha-2 or alpha-3 format.
+                data: null
+      operationId: get-tracking
+  "/public/v1/trackers/{trackerId}/webhook-events/resend":
+    post:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: Resend webhooks of an existing tracker
+      description: "This endpoint allows to resend all webhook messages of an existing tracker. \n\nThis can be useful in case you missed some webhook messages or if you need to reprocess them for any reason."
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+        - name: trackerId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: "**Required** Id of the tracker, provided by Ship24 at creation. `clientTrackerId` can also be used in this field by employing the `searchBy` parameter."
+          example: 26148317-7502-d3ac-44a9-546d240ac0dd
+        - name: searchBy
+          in: query
+          schema:
+            type: string
+            enum: ["trackerId", "clientTrackerId"]
+          example: trackerId
+          description: "Parameter allowing to search either by `trackerId`or `clientTrackerId`. Default behavior is by `trackerId`."
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      summary:
+                        type: object
+                        properties:
+                          totalResent:
+                            type: string
+                            description: The total number of events resent.
+                            example: 8
+              examples:
+                Success:
+                  value:
+                    data:
+                      summary:
+                        totalResent: 8
+      operationId: resend-webhooks

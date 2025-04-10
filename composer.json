@@ -1,0 +1,39 @@
+{
+    "name": "ship24/tracking-api",
+    "description": "## Getting started  Make sure to read the [Getting started](https://docs.ship24.com/getting-started) section of our [API Documentation](https://docs.ship24.com/) before using the endpoints presented below. ## Documentation structure  Use the top navigation bar to switch from:  - Our [API Documentation](https://docs.ship24.com/), which contains a comprehensive explanation of how our API works. - Our [API Reference](https://docs.ship24.com/tracking-api-reference/), which contains the specification of each of our endpoints. - Our [Support](https://docs.ship24.com/support/introduction) section, which contains help articles for most of the common questions and issues you may encounter.  ## Import our documentation into your HTTP client  Our API Reference is available as an Open API 3.1 format file, which is supported by most HTTP clients.  - Latest version: https://docs.ship24.com/assets/openapi/ship24-tracking-api.yaml  | <!-- -->                                                     | <!-- -->                                                                                                                                                     | | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | | ![Postman](/img/postman-logo.svg) Postman                    | In Postman, click on \"Import\", go on the \"Link\" tab, and paste this URL `https://docs.ship24.com/assets/openapi/ship24-tracking-api.yaml`                           | | <img src=\"/img/insomnia-logo.png\" width=\"32\"></img> Insomnia | From Insomnia preferences, locate the \"Import data\" option, choose \"From URL\", and paste this URL `https://docs.ship24.com/assets/openapi/ship24-tracking-api.yaml` |",
+    "keywords": [
+        "openapitools",
+        "openapi-generator",
+        "openapi",
+        "php",
+        "sdk",
+        "rest",
+        "api"
+    ],
+    "homepage": "https://openapi-generator.tech",
+    "license": "unlicense",
+    "authors": [
+        {
+            "name": "OpenAPI",
+            "homepage": "https://openapi-generator.tech"
+        }
+    ],
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "guzzlehttp/guzzle": "^7.3",
+        "guzzlehttp/psr7": "^1.7 || ^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0 || ^9.0",
+        "friendsofphp/php-cs-fixer": "^3.5"
+    },
+    "autoload": {
+        "psr-4": { "Ship24\\TrackingApi\\" : "lib/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Ship24\\TrackingApi\\Test\\" : "test/" }
+    }
+}
