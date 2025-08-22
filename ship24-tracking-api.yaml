@@ -42,7 +42,6 @@ components:
   schemas:
     tracker:
       type: object
-      x-internal: true
       title: Tracker
       properties:
         trackerId:
@@ -319,7 +318,6 @@ components:
           $ref: "#/components/schemas/metadata"
     statistics:
       type: object
-      x-internal: true
       properties:
         timestamps:
           type: object
@@ -376,7 +374,6 @@ components:
               example: "2021-03-05T17:12:57"
     metadata:
       type: object
-      x-internal: true
       title: metadata
       properties:
         generatedAt:
@@ -390,7 +387,6 @@ components:
           description: Unique identifier of the tracking object across webhooks.
     shipment:
       type: object
-      x-internal: true
       properties:
         shipmentId:
           type:
@@ -494,7 +490,6 @@ components:
                 - "null"
     event:
       type: object
-      x-internal: true
       properties:
         eventId:
           type: string
@@ -582,7 +577,6 @@ components:
           type: boolean
     error-response-format:
       type: object
-      x-internal: true
       title: Error response format
       properties:
         errors:
@@ -601,7 +595,6 @@ components:
     tracker-create-request:
       title: Tracker creation payload
       type: object
-      x-internal: true
       properties:
         trackingNumber:
           type: string
@@ -704,11 +697,9 @@ components:
         data:
           type: object
           nullable: true
-      x-internal: true
     bulk-create-trackers-request:
       title: Bulk create trackers request
       type: object
-      x-internal: true
       properties:
         trackers:
           type: array
@@ -720,7 +711,6 @@ components:
     bulk-create-trackers-response:
       title: Bulk create trackers response
       type: object
-      x-internal: true
       properties:
         status:
           description: "Status of the bulk creation.\n\n`success`: All trackers were created successfully or already existed. (Status code 200)\n\n`partial`: Operation contains both successes and errors. (Status code 207)\n\n`error`: All creations failed or error on request level. (Status codes 400, 403)"

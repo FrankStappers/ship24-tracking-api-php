@@ -2632,7 +2632,7 @@ class TrackersApi
         
 
 
-        $resourcePath = '/public/v1/trackers/bulk';
+        $resourcePath = '/public/v1/trackers';
         $formParams = [];
         $queryParams = [];
         $headerParams = [];

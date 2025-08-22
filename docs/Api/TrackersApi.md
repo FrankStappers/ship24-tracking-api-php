@@ -10,7 +10,7 @@ All URIs are relative to https://api.ship24.com, except if the operation defines
 | [**getTrackerByTrackerId()**](TrackersApi.md#getTrackerByTrackerId) | **GET** /public/v1/trackers/{trackerId} | Get an existing tracker |
 | [**getTrackingResultsOfTrackerByTrackerId()**](TrackersApi.md#getTrackingResultsOfTrackerByTrackerId) | **GET** /public/v1/trackers/{trackerId}/results | Get tracking results for an existing tracker |
 | [**getTrackingResultsOfTrackersByTrackingNumber()**](TrackersApi.md#getTrackingResultsOfTrackersByTrackingNumber) | **GET** /public/v1/trackers/search/{trackingNumber}/results | Get tracking results for existing trackers by tracking number |
-| [**listTrackers()**](TrackersApi.md#listTrackers) | **GET** /public/v1/trackers/bulk | List existing Trackers |
+| [**listTrackers()**](TrackersApi.md#listTrackers) | **GET** /public/v1/trackers | List existing Trackers |
 | [**resendWebhooks()**](TrackersApi.md#resendWebhooks) | **POST** /public/v1/trackers/{trackerId}/webhook-events/resend | Resend webhooks of an existing tracker |
 | [**updateTrackerByTrackerId()**](TrackersApi.md#updateTrackerByTrackerId) | **PATCH** /public/v1/trackers/{trackerId} | Update an existing tracker |
 
