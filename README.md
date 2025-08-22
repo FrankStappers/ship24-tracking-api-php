@@ -103,7 +103,7 @@ Class | Method | HTTP request | Description
 *TrackersApi* | [**getTrackerByTrackerId**](docs/Api/TrackersApi.md#gettrackerbytrackerid) | **GET** /public/v1/trackers/{trackerId} | Get an existing tracker
 *TrackersApi* | [**getTrackingResultsOfTrackerByTrackerId**](docs/Api/TrackersApi.md#gettrackingresultsoftrackerbytrackerid) | **GET** /public/v1/trackers/{trackerId}/results | Get tracking results for an existing tracker
 *TrackersApi* | [**getTrackingResultsOfTrackersByTrackingNumber**](docs/Api/TrackersApi.md#gettrackingresultsoftrackersbytrackingnumber) | **GET** /public/v1/trackers/search/{trackingNumber}/results | Get tracking results for existing trackers by tracking number
-*TrackersApi* | [**listTrackers**](docs/Api/TrackersApi.md#listtrackers) | **GET** /public/v1/trackers/bulk | List existing Trackers
+*TrackersApi* | [**listTrackers**](docs/Api/TrackersApi.md#listtrackers) | **GET** /public/v1/trackers | List existing Trackers
 *TrackersApi* | [**resendWebhooks**](docs/Api/TrackersApi.md#resendwebhooks) | **POST** /public/v1/trackers/{trackerId}/webhook-events/resend | Resend webhooks of an existing tracker
 *TrackersApi* | [**updateTrackerByTrackerId**](docs/Api/TrackersApi.md#updatetrackerbytrackerid) | **PATCH** /public/v1/trackers/{trackerId} | Update an existing tracker
 

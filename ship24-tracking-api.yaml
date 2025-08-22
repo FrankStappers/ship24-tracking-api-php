@@ -705,6 +705,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/tracker-create-request"
+          required: true
       required:
         - trackers
     bulk-create-trackers-response:
@@ -939,136 +940,137 @@ components:
                   availableForPickupDatetime: null
                   exceptionDatetime: null
                   deliveredDatetime: "2021-03-04T17:12:57"
-    response-bulk-create-trackers-success:
-      description: Example1
-      value:
-        status: success
-        summary:
-          totalInputs: 2
-          totalCreated: 2
-          totalExisting: 0
-          totalErrors: 0
-        data:
-          - itemStatus: created
-            inputData:
-              trackingNumber: S24DEMO456393
-              shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
-              clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
-              originCountryCode: CN
-              destinationCountryCode: US
-              destinationPostCode: "94901"
-              shippingDate: "2021-03-01T11:09:00.000Z"
-              courierCode:
-                - us-post
-              courierName: USPS Standard
-              trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
-              orderNumber: DF14R2022
-              settings:
-                restrictTrackingToCourierCode: true
-            tracker:
-              trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
-              trackingNumber: S24DEMO456393
-              shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
-              clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
-              isSubscribed: true
-              isTracked: true
-              createdAt: "2021-03-10T05:13:00.000Z"
-            errors: null
-          - itemStatus: created
-            inputData:
-              trackingNumber: S24DEMO788895
-              shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
-              clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
-              originCountryCode: CN
-              destinationCountryCode: US
-              destinationPostCode: "94901"
-              shippingDate: "2021-03-05T14:21:00.000Z"
-              courierCode:
-                - us-post
-              courierName: USPS
-              trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO788895"
-              orderNumber: DF14R2024
-              settings:
-                restrictTrackingToCourierCode: true
-            tracker:
-              trackerId: 001a975d-768d-4e16-a2b2-cff8a8f7e7fb
-              trackingNumber: S24DEMO788895
-              shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
-              clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
-              isSubscribed: true
-              isTracked: true
-              createdAt: "2021-03-10T05:13:00.000Z"
-            errors: null
-        error: null
-    response-bulk-create-trackers-partial:
-      value:
-        status: partial
-        summary:
-          totalInputs: 2
-          totalCreated: 1
-          totalExisting: 0
-          totalErrors: 1
-        data:
-          - itemStatus: created
-            inputData:
-              trackingNumber: S24DEMO456393
-              shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
-              clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
-              originCountryCode: CN
-              destinationCountryCode: US
-              destinationPostCode: "94901"
-              shippingDate: "2021-03-01T11:09:00.000Z"
-              courierCode:
-                - us-post
-              courierName: USPS Standard
-              trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
-              orderNumber: DF14R2022
-              settings:
-                restrictTrackingToCourierCode: true
-            tracker:
-              trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
-              trackingNumber: S24DEMO456393
-              shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
-              clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
-              isSubscribed: true
-              isTracked: true
-              createdAt: "2021-03-10T05:13:00.000Z"
-            errors: null
-          - itemStatus: error
-            inputData:
-              trackingNumber: TEST
-            errors:
-              - code: validation_error
-                message: "The trackingNumber provided seems invalid. Please make sure it's between 5 and 50 characters, containing only letters, numbers, and hyphens, and without dummy patterns and consecutive numbers."
-        error: null
-    response-bulk-create-trackers-badRequest:
-      value:
-        status: error
-        summary:
-          totalInputs: 1
-          totalCreated: 0
-          totalExisting: 0
-          totalErrors: 1
-        data:
-          - itemStatus: error
-            inputData:
-              trackingNumber: TEST
-            tracker: null
-            errors:
-              - code: validation_error
-                message: "The trackingNumber provided seems invalid. Please make sure it's between 5 and 50 characters, containing only letters, numbers, and hyphens, and without dummy patterns and consecutive numbers."
-        error:
-          code: processing_error
-          message: "Every single item failed validation. Please refer to the error field for each item."
-    response-bulk-create-trackers-forbidden:
-      description: Example2
-      value:
-        status: "error"
-        summary: null
-        data: null
-        error:
-          code: "quota_limit_reached"
-          message: "No more quota left. Please update your plan."
+    response-bulk-create-trackers:
+      Success:
+        description: Example1
+        value:
+          status: success
+          summary:
+            totalInputs: 2
+            totalCreated: 2
+            totalExisting: 0
+            totalErrors: 0
+          data:
+            - itemStatus: created
+              inputData:
+                trackingNumber: S24DEMO456393
+                shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                originCountryCode: CN
+                destinationCountryCode: US
+                destinationPostCode: "94901"
+                shippingDate: "2021-03-01T11:09:00.000Z"
+                courierCode:
+                  - us-post
+                courierName: USPS Standard
+                trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
+                orderNumber: DF14R2022
+                settings:
+                  restrictTrackingToCourierCode: true
+              tracker:
+                trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+                trackingNumber: S24DEMO456393
+                shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                isSubscribed: true
+                isTracked: true
+                createdAt: "2021-03-10T05:13:00.000Z"
+              errors: null
+            - itemStatus: created
+              inputData:
+                trackingNumber: S24DEMO788895
+                shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
+                clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
+                originCountryCode: CN
+                destinationCountryCode: US
+                destinationPostCode: "94901"
+                shippingDate: "2021-03-05T14:21:00.000Z"
+                courierCode:
+                  - us-post
+                courierName: USPS
+                trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO788895"
+                orderNumber: DF14R2024
+                settings:
+                  restrictTrackingToCourierCode: true
+              tracker:
+                trackerId: 001a975d-768d-4e16-a2b2-cff8a8f7e7fb
+                trackingNumber: S24DEMO788895
+                shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
+                clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
+                isSubscribed: true
+                isTracked: true
+                createdAt: "2021-03-10T05:13:00.000Z"
+              errors: null
+          error: null
+      Partial:
+        value:
+          status: partial
+          summary:
+            totalInputs: 2
+            totalCreated: 1
+            totalExisting: 0
+            totalErrors: 1
+          data:
+            - itemStatus: created
+              inputData:
+                trackingNumber: S24DEMO456393
+                shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                originCountryCode: CN
+                destinationCountryCode: US
+                destinationPostCode: "94901"
+                shippingDate: "2021-03-01T11:09:00.000Z"
+                courierCode:
+                  - us-post
+                courierName: USPS Standard
+                trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
+                orderNumber: DF14R2022
+                settings:
+                  restrictTrackingToCourierCode: true
+              tracker:
+                trackerId: 26148317-7502-d3ac-44a9-546d240ac0dd
+                trackingNumber: S24DEMO456393
+                shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                isSubscribed: true
+                isTracked: true
+                createdAt: "2021-03-10T05:13:00.000Z"
+              errors: null
+            - itemStatus: error
+              inputData:
+                trackingNumber: TEST
+              errors:
+                - code: validation_error
+                  message: "The trackingNumber provided seems invalid. Please make sure it's between 5 and 50 characters, containing only letters, numbers, and hyphens, and without dummy patterns and consecutive numbers."
+          error: null
+      Bad request:
+        value:
+          status: error
+          summary:
+            totalInputs: 1
+            totalCreated: 0
+            totalExisting: 0
+            totalErrors: 1
+          data:
+            - itemStatus: error
+              inputData:
+                trackingNumber: TEST
+              tracker: null
+              errors:
+                - code: validation_error
+                  message: "The trackingNumber provided seems invalid. Please make sure it's between 5 and 50 characters, containing only letters, numbers, and hyphens, and without dummy patterns and consecutive numbers."
+          error:
+            code: processing_error
+            message: "Every single item failed validation. Please refer to the error field for each item."
+      Forbidden:
+        description: Example2
+        value:
+          status: "error"
+          summary: null
+          data: null
+          error:
+            code: "quota_limit_reached"
+            message: "No more quota left. Please update your plan."
 tags:
   - name: "\U0001F4E6 Trackers"
   - name: ⚓ Webhooks
@@ -1095,7 +1097,7 @@ webhooks:
           description: Ship24 will send your allocated webhook secret in each request.
           example: Bearer your_webhook_secret
       responses:
-        200:
+        "200":
           description: Indicates that your server is ready to receive requests on this endpoint.
       operationId: receive-webhooks-health-check
     post:
@@ -1283,7 +1285,7 @@ webhooks:
           description: Ship24 will send your allocated webhook secret in each request.
           example: Bearer your_webhook_secret
       responses:
-        200:
+        "200":
           description: Indicates that your server successfully processed Ship24's request.
       operationId: receive-webhooks-tracking-results
 paths:
@@ -1335,7 +1337,7 @@ paths:
           required: true
       operationId: create-tracker
       responses:
-        201:
+        "201":
           description: Created
           content:
             application/json:
@@ -1359,7 +1361,7 @@ paths:
                         isSubscribed: true
                         isTracked: true
                         createdAt: "2021-03-10T05:13:00.000Z"
-        400:
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1372,111 +1374,6 @@ paths:
                       - code: validation_error
                         message: "The trackingNumber provided seems invalid. Please make sure it's between 5 and 50 characters, containing only letters, numbers, and hyphens, and without dummy patterns and consecutive numbers."
                     data: null
-  /public/v1/trackers/bulk:
-    post:
-      tags:
-        - "\U0001F4E6 Trackers"
-      summary: Bulk create trackers
-      description: |-
-        This endpoint allows you to create up to 100 new `Trackers` in a single operation, based on the specified information. Once the `Trackers` are created, you will be able to receive webhook notifications and/or fetch their tracking results.
-
-        > While tracker creation is idempotent, this endpoint itself is not. Any duplicate within the request or any tracker parameters matching an existing tracker will not create a duplicate `Tracker`. However, providing different information in any of the fields will create a new `Tracker`, as it will be considered as a new shipment.
-
-        The response will include a summary of:
-        - The number of trackers successfully created.
-        - The number of trackers ignored because they already exist.
-        - The number of trackers that could not be created due to errors.
-
-        Additionally, the response will provide details about the created trackers and any errors that occurred during the tracker creation process.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/bulk-create-trackers-request"
-            examples:
-              Valid request:
-                value:
-                  - trackingNumber: S24DEMO456393
-                    shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
-                    clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
-                    originCountryCode: CN
-                    destinationCountryCode: US
-                    destinationPostCode: "94901"
-                    shippingDate: "2021-03-01T11:09:00.000Z"
-                    courierCode:
-                      - us-post
-                    courierName: USPS Standard
-                    trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
-                    orderNumber: DF14R2022
-                    settings:
-                      restrictTrackingToCourierCode: true
-                  - trackingNumber: S24DEMO788895
-                    shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
-                    clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
-                    originCountryCode: CN
-                    destinationCountryCode: US
-                    destinationPostCode: "94901"
-                    shippingDate: "2021-03-05T14:21:00.000Z"
-                    courierCode:
-                      - us-post
-                    courierName: USPS
-                    trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO788895"
-                    orderNumber: DF14R2024
-                    settings:
-                      restrictTrackingToCourierCode: true
-      parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json; charset=utf-8
-          description: application/json; charset=utf-8
-          required: true
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: Bearer your_api_key
-          description: Your `api_key` prefixed with `Bearer`.
-          required: true
-      operationId: bulk-create-trackers
-      responses:
-        201:
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/bulk-create-trackers-response"
-              examples:
-                Success:
-                  $ref: "#/components/examples/response-bulk-create-trackers-success"
-        207:
-          description: Partially Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/bulk-create-trackers-response"
-              examples:
-                Partial:
-                  $ref: "#/components/examples/response-bulk-create-trackers-partial"
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/bulk-create-trackers-response"
-              examples:
-                Bad request:
-                  $ref: "#/components/examples/response-bulk-create-trackers-badRequest"
-        403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/bulk-create-trackers-response"
-              examples:
-                Forbidden:
-                  $ref: "#/components/examples/response-bulk-create-trackers-forbidden"
     get:
       tags:
         - "\U0001F4E6 Trackers"
@@ -1516,8 +1413,7 @@ paths:
           example: 1
           required: false
       responses:
-        200:
-          description: OK
+        "200":
           content:
             application/json:
               schema:
@@ -1639,6 +1535,111 @@ paths:
                     type: string
       operationId: list-trackers
     parameters: []
+  /public/v1/trackers/bulk:
+    post:
+      tags:
+        - "\U0001F4E6 Trackers"
+      summary: Bulk create trackers
+      description: |-
+        This endpoint allows you to create up to 100 new `Trackers` in a single operation, based on the specified information. Once the `Trackers` are created, you will be able to receive webhook notifications and/or fetch their tracking results.
+
+        > While tracker creation is idempotent, this endpoint itself is not. Any duplicate within the request or any tracker parameters matching an existing tracker will not create a duplicate `Tracker`. However, providing different information in any of the fields will create a new `Tracker`, as it will be considered as a new shipment.
+
+        The response will include a summary of:
+        - The number of trackers successfully created.
+        - The number of trackers ignored because they already exist.
+        - The number of trackers that could not be created due to errors.
+
+        Additionally, the response will provide details about the created trackers and any errors that occurred during the tracker creation process.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/bulk-create-trackers-request"
+            examples:
+              Valid request:
+                value:
+                  - trackingNumber: S24DEMO456393
+                    shipmentReference: c6e4fef4-a816-b68f-4024-3b7e4c5a9f81
+                    clientTrackerId: 3fa99515-3ca0-4901-85bb-056ee016799b
+                    originCountryCode: CN
+                    destinationCountryCode: US
+                    destinationPostCode: "94901"
+                    shippingDate: "2021-03-01T11:09:00.000Z"
+                    courierCode:
+                      - us-post
+                    courierName: USPS Standard
+                    trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO456393"
+                    orderNumber: DF14R2022
+                    settings:
+                      restrictTrackingToCourierCode: true
+                  - trackingNumber: S24DEMO788895
+                    shipmentReference: 85bff7fa-38ed-b1ba-4c15-322e41d16221
+                    clientTrackerId: c284fa2c-0808-48ea-bb9e-05c9135dc127
+                    originCountryCode: CN
+                    destinationCountryCode: US
+                    destinationPostCode: "94901"
+                    shippingDate: "2021-03-05T14:21:00.000Z"
+                    courierCode:
+                      - us-post
+                    courierName: USPS
+                    trackingUrl: "https://tools.usps.com/go/TrackConfirmAction?tLabels=S24DEMO788895"
+                    orderNumber: DF14R2024
+                    settings:
+                      restrictTrackingToCourierCode: true
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json; charset=utf-8
+          description: application/json; charset=utf-8
+          required: true
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer your_api_key
+          description: Your `api_key` prefixed with `Bearer`.
+          required: true
+      operationId: bulk-create-trackers
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bulk-create-trackers-response"
+              examples:
+                Success:
+                  $ref: "#/components/examples/response-bulk-create-trackers/Success"
+        "207":
+          description: Partially Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bulk-create-trackers-response"
+              examples:
+                Partial:
+                  $ref: "#/components/examples/response-bulk-create-trackers/Partial"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bulk-create-trackers-response"
+              examples:
+                Bad request:
+                  $ref: "#/components/examples/response-bulk-create-trackers/Bad request"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bulk-create-trackers-response"
+              examples:
+                Forbidden:
+                  $ref: "#/components/examples/response-bulk-create-trackers/Forbidden"
   /public/v1/trackers/track:
     post:
       tags:
@@ -1683,7 +1684,7 @@ paths:
           description: Your `api_key` prefixed with `Bearer`.
           required: true
       responses:
-        200:
+        "200":
           description: OK
           content:
             application/json:
@@ -1741,7 +1742,7 @@ paths:
           example: trackerId
           description: "Parameter allowing to search either by `trackerId`or `clientTrackerId`. Default behavior is by `trackerId`."
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -1862,8 +1863,7 @@ paths:
           example: trackerId
           description: "Parameter allowing to search either by `trackerId`or `clientTrackerId`. Default behavior is by `trackerId`."
       responses:
-        200:
-          description: OK
+        "200":
           content:
             application/json:
               schema:
@@ -1880,7 +1880,7 @@ paths:
                         isSubscribed: true
                         isTracked: true
                         createdAt: "2021-03-10T05:13:00.000Z"
-        400:
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1921,7 +1921,7 @@ paths:
           description: "**Required** Tracking number of the parcel."
           example: S24DEMO456393
       responses:
-        200:
+        "200":
           description: OK
           content:
             application/json:
@@ -1984,7 +1984,7 @@ paths:
           example: trackerId
           description: "Parameter allowing to search either by `trackerId`or `clientTrackerId`. Default behavior is by `trackerId`."
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -2012,7 +2012,7 @@ paths:
                 Success:
                   $ref: "#/components/examples/response-result-tracker"
           description: OK
-        404:
+        "404":
           description: Not Found
           content:
             application/json:
@@ -2041,7 +2041,7 @@ paths:
           description: Your `api_key` prefixed with `Bearer`.
           required: true
       responses:
-        200:
+        "200":
           description: OK
           content:
             application/json:
@@ -2145,12 +2145,17 @@ paths:
                 originCountryCode:
                   type: string
                   example: CN
-                  description: Sender country code.
+                  description: "Sender country code - \U0001F4CC Recommended to improve tracking accuracy"
                   format: ISO 3166-1 alpha-2/alpha-3
-                destinationPostCode:
+                destinationCountryCode:
                   type: string
                   example: US
                   description: "Recipient country code - \U0001F4CC Recommended to improve tracking accuracy"
+                  format: ISO 3166-1 alpha-2/alpha-3
+                destinationPostCode:
+                  type: string
+                  example: "94901"
+                  description: "Recipient Post code (or ZIP code) - \U0001F4CC Recommended to improve tracking accuracy"
                 shippingDate:
                   type: string
                   examples:
@@ -2179,7 +2184,7 @@ paths:
           description: Your `api_key` prefixed with `Bearer`.
           required: true
       responses:
-        201:
+        "201":
           description: Created
           content:
             application/json:
@@ -2345,7 +2350,7 @@ paths:
                               availableForPickupDatetime: null
                               exceptionDatetime: null
                               deliveredDatetime: "2021-03-04T17:12:57"
-        400:
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -2386,7 +2391,7 @@ paths:
           example: trackerId
           description: "Parameter allowing to search either by `trackerId`or `clientTrackerId`. Default behavior is by `trackerId`."
       responses:
-        201:
+        "201":
           description: Created
           content:
             application/json:

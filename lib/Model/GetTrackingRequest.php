@@ -59,6 +59,7 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
     protected static $openAPITypes = [
         'tracking_number' => 'string',
         'origin_country_code' => 'string',
+        'destination_country_code' => 'string',
         'destination_post_code' => 'string',
         'shipping_date' => '\DateTime',
         'courier_code' => 'mixed[]'
@@ -74,6 +75,7 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
     protected static $openAPIFormats = [
         'tracking_number' => null,
         'origin_country_code' => 'ISO 3166-1 alpha-2/alpha-3',
+        'destination_country_code' => 'ISO 3166-1 alpha-2/alpha-3',
         'destination_post_code' => null,
         'shipping_date' => 'date-time',
         'courier_code' => null
@@ -87,6 +89,7 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
     protected static array $openAPINullables = [
         'tracking_number' => false,
         'origin_country_code' => false,
+        'destination_country_code' => false,
         'destination_post_code' => false,
         'shipping_date' => false,
         'courier_code' => false
@@ -180,6 +183,7 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
     protected static $attributeMap = [
         'tracking_number' => 'trackingNumber',
         'origin_country_code' => 'originCountryCode',
+        'destination_country_code' => 'destinationCountryCode',
         'destination_post_code' => 'destinationPostCode',
         'shipping_date' => 'shippingDate',
         'courier_code' => 'courierCode'
@@ -193,6 +197,7 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
     protected static $setters = [
         'tracking_number' => 'setTrackingNumber',
         'origin_country_code' => 'setOriginCountryCode',
+        'destination_country_code' => 'setDestinationCountryCode',
         'destination_post_code' => 'setDestinationPostCode',
         'shipping_date' => 'setShippingDate',
         'courier_code' => 'setCourierCode'
@@ -206,6 +211,7 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
     protected static $getters = [
         'tracking_number' => 'getTrackingNumber',
         'origin_country_code' => 'getOriginCountryCode',
+        'destination_country_code' => 'getDestinationCountryCode',
         'destination_post_code' => 'getDestinationPostCode',
         'shipping_date' => 'getShippingDate',
         'courier_code' => 'getCourierCode'
@@ -270,6 +276,7 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
     {
         $this->setIfExists('tracking_number', $data ?? [], null);
         $this->setIfExists('origin_country_code', $data ?? [], null);
+        $this->setIfExists('destination_country_code', $data ?? [], null);
         $this->setIfExists('destination_post_code', $data ?? [], null);
         $this->setIfExists('shipping_date', $data ?? [], null);
         $this->setIfExists('courier_code', $data ?? [], null);
@@ -379,7 +386,7 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
     /**
      * Sets origin_country_code
      *
-     * @param string|null $origin_country_code Sender country code.
+     * @param string|null $origin_country_code Sender country code - 📌 Recommended to improve tracking accuracy
      *
      * @return self
      */
@@ -389,6 +396,33 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
             throw new \InvalidArgumentException('non-nullable origin_country_code cannot be null');
         }
         $this->container['origin_country_code'] = $origin_country_code;
+
+        return $this;
+    }
+
+    /**
+     * Gets destination_country_code
+     *
+     * @return string|null
+     */
+    public function getDestinationCountryCode()
+    {
+        return $this->container['destination_country_code'];
+    }
+
+    /**
+     * Sets destination_country_code
+     *
+     * @param string|null $destination_country_code Recipient country code - 📌 Recommended to improve tracking accuracy
+     *
+     * @return self
+     */
+    public function setDestinationCountryCode($destination_country_code)
+    {
+        if (is_null($destination_country_code)) {
+            throw new \InvalidArgumentException('non-nullable destination_country_code cannot be null');
+        }
+        $this->container['destination_country_code'] = $destination_country_code;
 
         return $this;
     }
@@ -406,7 +440,7 @@ class GetTrackingRequest implements ModelInterface, ArrayAccess, \JsonSerializab
     /**
      * Sets destination_post_code
      *
-     * @param string|null $destination_post_code Recipient country code - 📌 Recommended to improve tracking accuracy
+     * @param string|null $destination_post_code Recipient Post code (or ZIP code) - 📌 Recommended to improve tracking accuracy
      *
      * @return self
      */
