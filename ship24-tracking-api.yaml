@@ -625,6 +625,10 @@ components:
           type: string
           example: "94901"
           description: "Recipient Post code (or ZIP code)  - \U0001F4CC Recommended to improve tracking accuracy"
+        courierAccount:
+          type: string
+          example: "ABC"
+          description: "Courier account"
         shippingDate:
           type: string
           format: date-time
@@ -2088,7 +2092,7 @@ paths:
                               items:
                                 type: string
                                 enum:
-                                  [destinationPostCode, destinationCountryCode]
+                                  [destinationPostCode, destinationCountryCode, courierAccount]
                               example: null
                               description: "Indicate which additional information is required by the courier to get optimal tracking results. See [Additional information](https://docs.ship24.com/couriers#required-fields)"
                             isDeprecated:

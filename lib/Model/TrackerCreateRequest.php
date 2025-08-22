@@ -63,6 +63,7 @@ class TrackerCreateRequest implements ModelInterface, ArrayAccess, \JsonSerializ
         'origin_country_code' => 'string',
         'destination_country_code' => 'string',
         'destination_post_code' => 'string',
+        'courier_account' => 'string',
         'shipping_date' => '\DateTime',
         'courier_code' => 'string[]',
         'courier_name' => 'string',
@@ -87,6 +88,7 @@ class TrackerCreateRequest implements ModelInterface, ArrayAccess, \JsonSerializ
         'origin_country_code' => 'ISO 3166-1 alpha-2/alpha-3',
         'destination_country_code' => 'ISO 3166-1 alpha-2/alpha-3',
         'destination_post_code' => null,
+        'courier_account' => null,
         'shipping_date' => 'date-time',
         'courier_code' => null,
         'courier_name' => null,
@@ -109,6 +111,7 @@ class TrackerCreateRequest implements ModelInterface, ArrayAccess, \JsonSerializ
         'origin_country_code' => false,
         'destination_country_code' => false,
         'destination_post_code' => false,
+        'courier_account' => false,
         'shipping_date' => false,
         'courier_code' => false,
         'courier_name' => false,
@@ -211,6 +214,7 @@ class TrackerCreateRequest implements ModelInterface, ArrayAccess, \JsonSerializ
         'origin_country_code' => 'originCountryCode',
         'destination_country_code' => 'destinationCountryCode',
         'destination_post_code' => 'destinationPostCode',
+        'courier_account' => 'courierAccount',
         'shipping_date' => 'shippingDate',
         'courier_code' => 'courierCode',
         'courier_name' => 'courierName',
@@ -233,6 +237,7 @@ class TrackerCreateRequest implements ModelInterface, ArrayAccess, \JsonSerializ
         'origin_country_code' => 'setOriginCountryCode',
         'destination_country_code' => 'setDestinationCountryCode',
         'destination_post_code' => 'setDestinationPostCode',
+        'courier_account' => 'setCourierAccount',
         'shipping_date' => 'setShippingDate',
         'courier_code' => 'setCourierCode',
         'courier_name' => 'setCourierName',
@@ -255,6 +260,7 @@ class TrackerCreateRequest implements ModelInterface, ArrayAccess, \JsonSerializ
         'origin_country_code' => 'getOriginCountryCode',
         'destination_country_code' => 'getDestinationCountryCode',
         'destination_post_code' => 'getDestinationPostCode',
+        'courier_account' => 'getCourierAccount',
         'shipping_date' => 'getShippingDate',
         'courier_code' => 'getCourierCode',
         'courier_name' => 'getCourierName',
@@ -328,6 +334,7 @@ class TrackerCreateRequest implements ModelInterface, ArrayAccess, \JsonSerializ
         $this->setIfExists('origin_country_code', $data ?? [], null);
         $this->setIfExists('destination_country_code', $data ?? [], null);
         $this->setIfExists('destination_post_code', $data ?? [], null);
+        $this->setIfExists('courier_account', $data ?? [], null);
         $this->setIfExists('shipping_date', $data ?? [], null);
         $this->setIfExists('courier_code', $data ?? [], null);
         $this->setIfExists('courier_name', $data ?? [], null);
@@ -571,6 +578,33 @@ class TrackerCreateRequest implements ModelInterface, ArrayAccess, \JsonSerializ
             throw new \InvalidArgumentException('non-nullable destination_post_code cannot be null');
         }
         $this->container['destination_post_code'] = $destination_post_code;
+
+        return $this;
+    }
+
+    /**
+     * Gets courier_account
+     *
+     * @return string|null
+     */
+    public function getCourierAccount()
+    {
+        return $this->container['courier_account'];
+    }
+
+    /**
+     * Sets courier_account
+     *
+     * @param string|null $courier_account Courier account
+     *
+     * @return self
+     */
+    public function setCourierAccount($courier_account)
+    {
+        if (is_null($courier_account)) {
+            throw new \InvalidArgumentException('non-nullable courier_account cannot be null');
+        }
+        $this->container['courier_account'] = $courier_account;
 
         return $this;
     }

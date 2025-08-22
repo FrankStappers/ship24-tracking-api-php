@@ -266,6 +266,7 @@ class GetCouriers200ResponseDataCouriersInner implements ModelInterface, ArrayAc
 
     public const REQUIRED_FIELDS_DESTINATION_POST_CODE = 'destinationPostCode';
     public const REQUIRED_FIELDS_DESTINATION_COUNTRY_CODE = 'destinationCountryCode';
+    public const REQUIRED_FIELDS_COURIER_ACCOUNT = 'courierAccount';
 
     /**
      * Gets allowable values of the enum
@@ -277,6 +278,7 @@ class GetCouriers200ResponseDataCouriersInner implements ModelInterface, ArrayAc
         return [
             self::REQUIRED_FIELDS_DESTINATION_POST_CODE,
             self::REQUIRED_FIELDS_DESTINATION_COUNTRY_CODE,
+            self::REQUIRED_FIELDS_COURIER_ACCOUNT,
         ];
     }
 
